@@ -1,4 +1,5 @@
 require "logging/version"
+require "logging/level"
 require "logger"
 
 module Logging
@@ -7,7 +8,7 @@ module Logging
   def self.set_logger(logger = nil, level=::Logger::INFO, rotate='daily')
     logger ||= DEFAULT_OUTPUT
     @logger = (logger.is_a?(Logger) ? logger : ::Logger.new(logger, rotate))
-    @logger.level = level
+    @logger.level = Logging::Level.parse_level(level)
     @logger
   end
 
