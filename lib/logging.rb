@@ -1,15 +1,22 @@
 require "logging/version"
 require "logging/level"
+require "logging/device"
 require "logger"
 
 module Logging
-  DEFAULT_OUTPUT = STDOUT
-
-  def self.set_logger(logger = nil, level=::Logger::INFO, rotate='daily')
-    logger ||= DEFAULT_OUTPUT
-    @logger = (logger.is_a?(Logger) ? logger : ::Logger.new(logger, rotate))
-    @logger.level = Logging::Level.parse_level(level)
+  def self.set_logger(logger=nil, level=nil, rotate='daily')
+    @logger = ::Logger.new(Logging::Device.from(logger), rotate)
+    if level
+      @logger.level = Logging::Level.parse_level(level)
+    elsif logger.respond_to?(:level)
+      # i.e. inherit logger level if `logger` arg is a Logger
+      @logger.level = logger.level
+    end
     @logger
+  end
+
+  def self.logger_description
+    Logging::Device.describe(@logger)
   end
 
   def self.logger
@@ -18,7 +25,7 @@ module Logging
   end
 
   def self.init_default_logger
-    set_logger(DEFAULT_OUTPUT)
+    set_logger(Device::DEFAULT)
   end
 
   module Logger
