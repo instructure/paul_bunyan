@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require_relative '../lib/logging'
+
+logger = Logging.set_logger(STDOUT)
+puts "JSONFormatter"
+logger.debug("LoggingDemo") { "This is my debug message" }
+logger.info("LoggingDemo") { "This is my info message" }
+logger.info("loggingDemo") { {foo: "bar", baz: "qux"} }
+logger.warn("LoggingDemo") { "This is my warn message" }
+begin
+  raise "heck"
+rescue => ex
+  logger.error("LoggingDemo") { ex }
+end
+logger.fatal("LoggingDemo") { "This is my fatal message" }

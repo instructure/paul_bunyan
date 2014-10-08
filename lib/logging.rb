@@ -1,17 +1,19 @@
 require "logging/version"
 require "logging/level"
 require "logging/device"
+require "logging/json_formatter"
+require "logging/logger_extensions"
 require "logger"
 
 module Logging
   def self.set_logger(logger=nil, level=nil, rotate='daily')
-    @logger = ::Logger.new(Logging::Device.from(logger), rotate)
-    if level
-      @logger.level = Logging::Level.parse_level(level)
-    elsif logger.respond_to?(:level)
-      # i.e. inherit logger level if `logger` arg is a Logger
-      @logger.level = logger.level
+    if ::Logger === logger
+      @logger = logger
+    else
+      @logger = ::Logger.new(::Logging::Device.from(logger), rotate)
+      @logger.formatter = JSONFormatter.new(@logger.tty?)
     end
+    @logger.level = Logging::Level.parse_level(level) if level
     @logger
   end
 
@@ -30,7 +32,7 @@ module Logging
 
   module Logger
     def logger
-      Logging.logger
+      ::Logging.logger
     end
   end
 end

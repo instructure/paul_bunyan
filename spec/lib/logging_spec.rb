@@ -1,4 +1,4 @@
-require "logging"
+require "spec_helper"
 
 describe Logging do
   it "can be included" do

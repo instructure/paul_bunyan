@@ -14,22 +14,13 @@ module Logging
     # - a Logger object, in which case we pull out its LogDevice so that
     #   the new Logger can behave like the passed-in Logger
     def self.from(device_or_filename)
-      case device_or_filename
-      when NilClass
-        DEFAULT
-      when IO, File
+      return device_or_filename unless String === device_or_filename
+      case device_or_filename.downcase
+      when 'stdout' then STDOUT
+      when 'stderr' then STDERR
+      else
+        # Return what we assume is a file path
         device_or_filename
-      when String
-        case device_or_filename.downcase
-        when 'stdout' then STDOUT
-        when 'stderr' then STDERR
-        else
-          # Return what we assume is a file path
-          device_or_filename
-        end
-      when ::Logger
-        logger = device_or_filename
-        logger.instance_variable_get("@logdev")
       end
     end
 

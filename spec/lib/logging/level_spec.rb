@@ -1,4 +1,4 @@
-require "logging/level"
+require "spec_helper"
 
 describe Logging::Level do
 
