@@ -58,8 +58,8 @@ module Logging
 
     def format_exception(exception)
       {
-        class: exception.class,
-        message: exception.exception,
+        class: exception.class.to_s,
+        message: exception.message,
         backtrace: exception.backtrace,
       }
     end
