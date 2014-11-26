@@ -6,6 +6,9 @@ module Logging
     include Term::ANSIColor
 
     DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%6N %Z'
+
+    SERIOUS_LEVELS = %w{WARN ERROR FATAL}
+
     SEVERITY_COLORS = Hash.new {|h, k|
       :white
     }.tap { |colors|
@@ -15,8 +18,8 @@ module Logging
       colors['DEBUG'] = :faint
     }
 
-    def initialize(tty_output = false)
-      @tty_output = tty_output
+    def initialize(logger)
+      @logger = logger
     end
 
     def datetime_format=(value)
@@ -36,9 +39,11 @@ module Logging
           "pid"      => $$,
         }
         metadata['program'] = progname if progname
+        if @logger.respond_to?(:caller_metadata) && serious?(severity)
+          metadata.merge!(@logger.caller_metadata)
+        end
         message_data = format_message(msg)
-
-        merge_metadata_and_message(metadata, message_data).to_json + "\n"
+        JSON::generate(merge_metadata_and_message(metadata, message_data), max_nesting: 2) + "\n"
       end
     end
 
@@ -58,19 +63,21 @@ module Logging
 
     def format_exception(exception)
       {
-        class: exception.class.to_s,
-        message: exception.message,
-        backtrace: exception.backtrace,
+        "exception.class" => exception.class.to_s,
+        "exception.backtrace" => exception.backtrace,
+        "message" => exception.message,
       }
     end
 
     def format_string(message)
-      { message: message }
+      { "message" => message }
     end
 
     def format_generic_object(object)
       if object.respond_to?(:to_h)
         object.to_h
+      elsif object.respond_to?(:to_hash)
+        object.to_hash
       else
         format_string(object.inspect)
       end
@@ -85,7 +92,7 @@ module Logging
       message.inject({}) { |clean, (key, value)|
         key = key.to_s
         if metadata_keys.include?(key)
-          clean["#{ key }_user"] = value
+          clean["user.#{ key }"] = value
         else
           clean[key] = value
         end
@@ -94,11 +101,19 @@ module Logging
     end
 
     def with_color(severity, &block)
-      if @tty_output
+      if tty?
         self.send(SEVERITY_COLORS[severity], &block)
       else
         yield
       end
+    end
+
+    def serious?(severity)
+      SERIOUS_LEVELS.include?(severity)
+    end
+
+    def tty?
+      @logger && @logger.device.tty?
     end
   end
 end

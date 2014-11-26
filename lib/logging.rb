@@ -1,38 +1,49 @@
 require "logging/version"
 require "logging/level"
 require "logging/device"
+require "logging/introspectable_logger"
 require "logging/json_formatter"
-require "logging/logger_extensions"
 require "logger"
 
+# Example Usage:
+#
+#   class MyClass
+#     include Logging
+#
+#     def initialize
+#       logger.info{ "something is working!" }
+#     end
+#   end
+#
 module Logging
-  def self.set_logger(logger=nil, level=nil, rotate='daily')
-    if ::Logger === logger
-      @logger = logger
-    else
-      @logger = ::Logger.new(::Logging::Device.from(logger), rotate)
-      @logger.formatter = JSONFormatter.new(@logger.tty?)
-    end
-    @logger.level = Logging::Level.parse_level(level) if level
-    @logger
+  # The ONE method we care about.
+  def logger
+    Logging.logger
   end
 
-  def self.logger_description
-    Logging::Device.describe(@logger)
-  end
-
-  def self.logger
-    return @logger if @logger
-    init_default_logger
-  end
-
-  def self.init_default_logger
-    set_logger(Device::DEFAULT)
-  end
-
-  module Logger
+  class << self
+    # The singleton @logger object for the whole app
     def logger
-      ::Logging.logger
+      @logger ||= set_logger(STDOUT)
+    end
+
+    def logger=(log_like)
+      set_logger(log_like)
+    end
+
+    def set_logger(log_like, shift_age = nil, shift_size = nil)
+      @logger =
+        case log_like
+        when IntrospectableLogger then
+          log_like
+        else
+          opts = {}
+          opts[:shift_age] = shift_age if shift_age
+          opts[:shift_size] = shift_size if shift_size
+          IntrospectableLogger.new(log_like, opts).tap do |logger|
+            logger.formatter = JSONFormatter.new(logger)
+          end
+        end
     end
   end
 end

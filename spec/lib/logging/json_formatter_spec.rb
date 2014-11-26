@@ -1,8 +1,9 @@
 require "spec_helper"
+require "time"
 
 module Logging
   describe JSONFormatter do
-    let(:formatter) { JSONFormatter.new }
+    let(:formatter) { JSONFormatter.new(nil) }
     let(:time) { Time.new(2015, 2, 7, 13, 52, 3.141592) }
 
     describe "#call(severity, time, progname, msg)" do
@@ -30,13 +31,13 @@ module Logging
         expect(object['program']).to eq 'FooBar'
       end
 
-      it 'must include the current process id as the pid key' do
+      it "must include the current process id as the pid key" do
         output = formatter.call('', time, '', '')
         object = JSON.parse(output)
         expect(object['pid']).to eq $$
       end
 
-      it 'must wrap a string message in an object with a message key containing the key' do
+      it "must wrap a string message in an object with a message key containing the key" do
         output = formatter.call('', time, '', 'This is my message, there are many like it.')
         object = JSON.parse(output)
         expect(object['message']).to eq 'This is my message, there are many like it.'
@@ -53,30 +54,26 @@ module Logging
         let(:output) { formatter.call('', time, '', logged_hash) }
         let(:parsed_output) { JSON.parse(output) }
 
-        it 'must merge the hash with the base information' do
+        it "must merge the hash with the base information" do
           expect(parsed_output['foo']).to eq 'bar'
         end
 
-        it 'must protect the base attributes by adding a suffix to supplied keys that collide' do
-          expect(parsed_output['ts_user']).to_not be nil
+        it "must protect the base attributes by prefixing 'user' to supplied keys that collide" do
+          expect(parsed_output['user.ts']).to_not be nil
         end
       end
 
-      context 'when supplied an exception object' do
+      context "when supplied an exception object" do
         let(:exception) {
-          begin
-            raise StandardError, "This is my exception...."
-          rescue StandardError
-            exception = $!
-          end
+          begin raise StandardError, "This is my exception...."
+          rescue; exception = $!; end
           exception
         }
-
         let(:output) { formatter.call('', time, '', exception) }
         let(:parsed_output) { JSON.parse(output) }
 
-        it 'must include the exception class' do
-          expect(parsed_output['class']).to eq 'StandardError'
+        it "must include the exception class" do
+          expect(parsed_output['exception.class']).to eq 'StandardError'
         end
 
         it "must include the exception's message" do
@@ -84,7 +81,7 @@ module Logging
         end
 
         it "must include the exception's backtrace" do
-          expect(parsed_output['backtrace']).to eq exception.backtrace
+          expect(parsed_output['exception.backtrace']).to eq exception.backtrace
         end
       end
     end

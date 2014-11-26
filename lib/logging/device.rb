@@ -1,46 +1,39 @@
 require 'logger'
+require 'forwardable'
 
 module Logging
-  module Device
-    DEFAULT = STDOUT
+  class Device
+    extend Forwardable
 
-    # Accept the following types of log device descriptors and return an
-    # object compatible with Logger.new:
-    # - nil
-    # - an IO or File object
-    # - a file path, OR the special filenames "stdout" or "stderr"
-    #   If the latter, these special filenames are interpreted to actually
-    #   mean STDOUT or STDERR, respectively.
-    # - a Logger object, in which case we pull out its LogDevice so that
-    #   the new Logger can behave like the passed-in Logger
-    def self.from(device_or_filename)
-      return device_or_filename unless String === device_or_filename
-      case device_or_filename.downcase
-      when 'stdout' then STDOUT
-      when 'stderr' then STDERR
+    def initialize(log = STDOUT, opt = {})
+      @device = Logger::LogDevice.new(from(log), opt)
+    end
+
+    def_delegators :@device, :write, :close, :dev, :filename
+
+    # Convert 'stdout' or 'stderr' special-case strings to STDOUT or STDERR
+    def from(log)
+      if log.is_a?(String) && log.downcase == 'stdout'
+        STDOUT
+      elsif log.is_a?(String) && log.downcase == 'stderr'
+        STDERR
       else
-        # Return what we assume is a file path
-        device_or_filename
+        log
       end
     end
 
-    # Given a Logger object, return a string describing where the log output
-    # is going, e.g. STDOUT for standard out, or /tmp/file.log for a file
-    def self.describe(logger)
-      case logger
-      when ::Logger
-        logdev = logger.instance_variable_get("@logdev")
-        if logdev.filename
-          return logdev.filename
-        elsif logdev.dev
-          if logdev.dev.inspect =~ /IO:<([^>]+)>/
-            return $1
-          end
-        end
-        return "Unknown Log Destination (#{logdev.inspect})"
-      else
-        logger
-      end
+    # Return a (human-readable) string describing where the log output is
+    # going, e.g. STDOUT, STDERR, /tmp/file.log, etc.
+    def description
+      filename || dev_description || "Unknown Log Destination (#{dev.inspect})"
+    end
+
+    def dev_description
+      (m = dev.inspect.match(/IO:<([^>]+)>/)) && m[1]
+    end
+
+    def tty?
+      dev.respond_to?(:tty?) && dev.tty?
     end
   end
 end
