@@ -39,11 +39,20 @@ module Logging
           "pid"      => $$,
         }
         metadata['program'] = progname if progname
+
         if @logger.respond_to?(:caller_metadata) && serious?(severity)
-          metadata.merge!(@logger.caller_metadata)
+          c_metadata = @logger.caller_metadata
+        else
+          c_metadata = {}
         end
+
         message_data = format_message(msg)
-        JSON::generate(merge_metadata_and_message(metadata, message_data), max_nesting: 2) + "\n"
+
+        begin
+          JSON::generate(merge_metadata_and_message(metadata.merge(c_metadata), message_data), max_nesting: 10) + "\n"
+        rescue JSON::NestingError => e
+          JSON::generate(merge_metadata_and_message(metadata.merge("nesting_error" => e), message_data)) + "\n"
+        end
       end
     end
 
