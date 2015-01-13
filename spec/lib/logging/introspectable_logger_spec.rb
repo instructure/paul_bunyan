@@ -4,7 +4,7 @@ describe Logging::IntrospectableLogger do
   let(:logger) { Logging::IntrospectableLogger.new }
 
   it "initializes" do
-    logger
+    expect { logger }.not_to raise_error
   end
 
   it "includes the magic instance variable" do

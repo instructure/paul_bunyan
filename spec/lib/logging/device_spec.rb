@@ -35,4 +35,42 @@ describe Logging::Device do
     end
   end
 
+  context "#with_temp_device" do
+    before(:all) { require 'tempfile' }
+
+    let(:device) { Logging::Device.new("/dev/null") }
+    let(:tmpfile) { Tempfile.new("temp_device.log") }
+
+    it "adds then removes the given device to the internal list of devices" do
+      # Expect the device to get added
+      device.with_temp_device(tmpfile) do
+        expect(device.all_devices).to include(tmpfile)
+      end
+      # Expect it to be gone once the block finishes
+      expect(device.all_devices).not_to include(tmpfile)
+    end
+
+    it "logs to the device" do
+      expect(tmpfile).to receive(:write).with(kind_of(String))
+
+      device.with_temp_device(tmpfile) do
+        device.write("Foo!")
+      end
+    end
+
+    it "re-raises and logs exceptions" do
+      expect(tmpfile).to receive(:write).with(kind_of(String))
+
+      expect {
+        device.with_temp_device(tmpfile) do
+          raise :this_is_an_error
+        end
+      }.to raise_error
+    end
+
+    after(:each) do
+      tmpfile.unlink
+    end
+  end
+
 end

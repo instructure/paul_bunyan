@@ -18,8 +18,9 @@ module Logging
       colors['DEBUG'] = :faint
     }
 
-    def initialize(logger)
+    def initialize(logger, opts={})
       @logger = logger
+      @opts = opts
     end
 
     def datetime_format=(value)
@@ -110,7 +111,7 @@ module Logging
     end
 
     def with_color(severity, &block)
-      if tty?
+      if use_color?
         self.send(SEVERITY_COLORS[severity], &block)
       else
         yield
@@ -119,6 +120,10 @@ module Logging
 
     def serious?(severity)
       SERIOUS_LEVELS.include?(severity)
+    end
+
+    def use_color?
+      @opts.has_key?(:color) ? @opts[:color] : tty?
     end
 
     def tty?
