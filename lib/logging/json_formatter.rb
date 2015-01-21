@@ -50,8 +50,8 @@ module Logging
 
         begin
           JSON::generate(merge_metadata_and_message(metadata.merge(c_metadata), message_data), max_nesting: 10) + "\n"
-        rescue JSON::NestingError => e
-          JSON::generate(merge_metadata_and_message(metadata.merge("nesting_error" => e), message_data)) + "\n"
+        rescue JSON::NestingError, SystemStackError => e
+          JSON::generate(merge_metadata_and_message(metadata.merge(e.class.name => e), message_data)) + "\n"
         end
       end
     end
