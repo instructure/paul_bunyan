@@ -7,8 +7,6 @@ module Logging
 
     DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%6N %Z'
 
-    SERIOUS_LEVELS = %w{WARN ERROR FATAL}
-
     SEVERITY_COLORS = Hash.new {|h, k|
       :white
     }.tap { |colors|
@@ -41,19 +39,9 @@ module Logging
         }
         metadata['program'] = progname if progname
 
-        if @logger.respond_to?(:caller_metadata) && serious?(severity)
-          c_metadata = @logger.caller_metadata
-        else
-          c_metadata = {}
-        end
-
         message_data = format_message(msg)
 
-        begin
-          JSON::generate(merge_metadata_and_message(metadata.merge(c_metadata), message_data), max_nesting: 10) + "\n"
-        rescue JSON::NestingError, SystemStackError => e
-          JSON::generate(merge_metadata_and_message(metadata.merge(e.class.name => e), message_data)) + "\n"
-        end
+        JSON::generate(merge_metadata_and_message(metadata, message_data)) + "\n"
       end
     end
 
@@ -116,10 +104,6 @@ module Logging
       else
         yield
       end
-    end
-
-    def serious?(severity)
-      SERIOUS_LEVELS.include?(severity)
     end
 
     def use_color?

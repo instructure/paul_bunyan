@@ -1,7 +1,7 @@
 require "logging/version"
 require "logging/level"
 require "logging/device"
-require "logging/introspectable_logger"
+require "logging/helpful_logger"
 require "logging/json_formatter"
 require "logger"
 
@@ -34,13 +34,13 @@ module Logging
     def set_logger(log_like, shift_age = nil, shift_size = nil)
       @logger =
         case log_like
-        when IntrospectableLogger then
+        when HelpfulLogger then
           log_like
         else
           opts = {}
           opts[:shift_age] = shift_age if shift_age
           opts[:shift_size] = shift_size if shift_size
-          IntrospectableLogger.new(log_like, opts).tap do |logger|
+          HelpfulLogger.new(log_like, opts).tap do |logger|
             logger.formatter = JSONFormatter.new(logger)
           end
         end
