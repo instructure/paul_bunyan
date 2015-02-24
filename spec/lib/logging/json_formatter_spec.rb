@@ -77,7 +77,7 @@ module Logging
         end
 
         it "must include the exception's message" do
-          expect(parsed_output['message']).to eq 'This is my exception....'
+          expect(parsed_output['exception.message']).to eq 'This is my exception....'
         end
 
         it "must include the exception's backtrace" do

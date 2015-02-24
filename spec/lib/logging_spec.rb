@@ -1,19 +1,25 @@
 require "spec_helper"
 
 describe Logging do
-  it "can be included" do
-    class Harness
-      include Logging
+  describe 'when included in another class' do
+    it 'must add the #logger method to the host' do
+      klass = Class.new
+      instance = klass.new
+
+      expect(instance).to_not respond_to :logger
+
+      klass.send(:include, Logging)
+      expect(instance).to respond_to :logger
     end
-    h = Harness.new
-    expect(h.respond_to?(:logger)).to be_truthy
   end
 
-  it "logger when uninited it goes to stdout" do
-    expect(Logging.logger.device.dev).to eq STDOUT
+  describe ".logger" do
+    it 'must build a logger writing to STDOUT when unset' do
+      expect(Logging.logger.device.dev).to eq STDOUT
+    end
   end
 
-  describe "#set_logger" do
+  describe ".set_logger" do
     it "accepts a Logger object" do
       logger = Logger.new(STDERR)
       Logging.set_logger(logger)
@@ -29,13 +35,6 @@ describe Logging do
       Logging.set_logger(logger)
       expect(logger.level).to eq ::Logger::FATAL
       expect(Logging.logger.level).to eq ::Logger::FATAL
-    end
-  end
-
-  describe "#description" do
-    it "describes STDOUT" do
-      Logging.set_logger('stdout')
-      expect(Logging.logger.description).to eq("STDOUT")
     end
   end
 end

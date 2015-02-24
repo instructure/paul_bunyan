@@ -1,9 +1,10 @@
+require "logger"
+
 require "logging/version"
 require "logging/level"
 require "logging/device"
 require "logging/helpful_logger"
 require "logging/json_formatter"
-require "logger"
 
 # Example Usage:
 #
@@ -16,6 +17,9 @@ require "logger"
 #   end
 #
 module Logging
+  class Error < StandardError; end
+  class UnknownLevelError < Error; end
+
   # The ONE method we care about.
   def logger
     Logging.logger
@@ -31,16 +35,13 @@ module Logging
       set_logger(log_like)
     end
 
-    def set_logger(log_like, shift_age = nil, shift_size = nil)
+    def set_logger(log_like, options = {})
       @logger =
         case log_like
         when HelpfulLogger then
           log_like
         else
-          opts = {}
-          opts[:shift_age] = shift_age if shift_age
-          opts[:shift_size] = shift_size if shift_size
-          HelpfulLogger.new(log_like, opts).tap do |logger|
+          HelpfulLogger.new(log_like, options).tap do |logger|
             logger.formatter = JSONFormatter.new(logger)
           end
         end

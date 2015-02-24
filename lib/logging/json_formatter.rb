@@ -63,7 +63,7 @@ module Logging
       {
         "exception.class" => exception.class.to_s,
         "exception.backtrace" => exception.backtrace,
-        "message" => exception.message,
+        "exception.message" => exception.message,
       }
     end
 
