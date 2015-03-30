@@ -5,7 +5,7 @@ module Logging
   class JSONFormatter
     include Term::ANSIColor
 
-    DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%6N %Z'
+    DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%3N'
 
     SEVERITY_COLORS = Hash.new {|h, k|
       :white
@@ -34,6 +34,7 @@ module Logging
       with_color severity do
         metadata = {
           "ts"       => time.utc.strftime(DATETIME_FORMAT),
+          "unix_ts"  => time.to_f,
           "severity" => severity,
           "pid"      => $$,
         }

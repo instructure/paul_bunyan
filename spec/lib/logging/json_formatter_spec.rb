@@ -18,11 +18,16 @@ module Logging
         expect(object['severity']).to eq 'WARN'
       end
 
-      it "must include the supplied timestamp including microseconds" do
+      it "must include the supplied timestamp including miliseconds" do
         output = formatter.call('', time, '', '')
         object = JSON.parse(output)
-        parsed_time = Time.parse(object['ts'])
-        expect(parsed_time.to_f).to eq time.to_f
+        expect(object['ts']).to eq time.strftime('%Y-%m-%dT%H:%M:%S.%3N')
+      end
+
+      it "must include a high resolution unix timestamp in as the unix_ts key" do
+        output = formatter.call('', time, '', '')
+        object = JSON.parse(output)
+        expect(object['unix_ts']).to eq time.to_f
       end
 
       it "must include the supplied progname argument as the program key" do
