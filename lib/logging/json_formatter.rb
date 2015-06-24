@@ -97,7 +97,7 @@ module Logging
     end
 
     def format_string(message)
-      { "message" => message }
+      { "message" => uncolored(message.strip) }
     end
 
     def format_generic_object(object)

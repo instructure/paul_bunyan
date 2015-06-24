@@ -5,6 +5,7 @@ require "logging/level"
 require "logging/device"
 require "logging/helpful_logger"
 require "logging/json_formatter"
+require 'logging/railtie' if defined? ::Rails::Railtie
 
 # Example Usage:
 #

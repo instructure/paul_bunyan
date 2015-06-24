@@ -16,32 +16,6 @@ module Logging
       end
     end
 
-    describe '#level=(value)' do
-      it 'must set the level to DEBUG when passed nil' do
-        logger.level = nil
-        expect(logger.level).to eq Logger::DEBUG
-      end
-
-      it 'must set the level properly when passed an integer (or Logger level constant)' do
-        logger.level = 3
-        expect(logger.level).to eq Logger::ERROR
-      end
-
-      it 'must set the level properly when passed the string representation of an integer' do
-        logger.level = '4'
-        expect(logger.level).to eq Logger::FATAL
-      end
-
-      it 'must set the level properly when passed a lower case level string' do
-        logger.level = 'warn'
-        expect(logger.level).to eq Logger::WARN
-      end
-
-      it 'must raise a descriptive exception when passed a string that does not match a known level' do
-        expect { logger.level = 'garbage level' }.to raise_error Logging::UnknownLevelError
-      end
-    end
-
     describe '#push_tags(*tags)' do
       before do
         logger.formatter = JSONFormatter.new(logger)
