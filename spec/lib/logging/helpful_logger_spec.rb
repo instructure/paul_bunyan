@@ -41,5 +41,20 @@ module Logging
         expect { logger.level = 'garbage level' }.to raise_error Logging::UnknownLevelError
       end
     end
+
+    describe '#push_tags(*tags)' do
+      before do
+        logger.formatter = JSONFormatter.new(logger)
+      end
+
+      it 'must add tags to the formatter' do
+        begin
+          logger.push_tags(%w{foo bar baz})
+          expect(logger.formatter.current_tags).to eq %w{foo bar baz}
+        ensure
+          logger.clear_tags!
+        end
+      end
+    end
   end
 end

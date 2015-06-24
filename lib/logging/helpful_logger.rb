@@ -2,6 +2,7 @@ require 'forwardable'
 
 module Logging
   class HelpfulLogger
+    attr_reader :logger
     extend Forwardable
 
     VALID_LEVEL_NAMES = Logger.constants.select{|c| Logger.const_get(c).is_a?(Fixnum) }
@@ -31,7 +32,6 @@ module Logging
       :error, :error?,
       :fatal, :fatal?,
       :<<, :add, :close,
-      :formatter, :formatter=,
       :level, :unknown
 
     def device
@@ -44,6 +44,30 @@ module Logging
 
     def description
       device.description
+    end
+
+    def formatter
+      @formatter || @logger.formatter
+    end
+
+    def formatter=(formatter)
+      @logger.formatter = @formatter = formatter
+    end
+
+    def_delegators(
+      :formatter,
+      :push_tags,
+      :pop_tags,
+      :clear_tags!
+    )
+
+    def tagged(*tags)
+      formatter.tagged(*tags) { yield self  }
+    end
+
+    def flush
+      clear_tags!
+      @logger.flush if @logger.respond_to?(:flush)
     end
 
     def level=(value)

@@ -1,5 +1,6 @@
-require "json"
-require "term/ansicolor"
+require 'thread'
+require 'json'
+require 'term/ansicolor'
 
 module Logging
   class JSONFormatter
@@ -21,15 +22,6 @@ module Logging
       @opts = opts
     end
 
-    def datetime_format=(value)
-      # intentional nop because the whole point of this formatter is
-      # to have a consistent machine parsable format :-P
-    end
-
-    def datetime_format
-      DATETIME_FORMAT
-    end
-
     def call(severity, time, progname, msg)
       with_color severity do
         metadata = {
@@ -39,11 +31,47 @@ module Logging
           "pid"      => $$,
         }
         metadata['program'] = progname if progname
+        metadata['tags'] = current_tags unless current_tags.empty?
 
         message_data = format_message(msg)
 
         JSON::generate(merge_metadata_and_message(metadata, message_data)) + "\n"
       end
+    end
+
+    def clear_tags!
+      current_tags.clear
+    end
+
+    def current_tags
+      thread_key = @thread_key ||= "logging_tagged_logging_tags:#{ Thread.current.object_id }"
+      Thread.current[thread_key] ||= []
+    end
+
+    def datetime_format=(value)
+      # intentional nop because the whole point of this formatter is
+      # to have a consistent machine parsable format :-P
+    end
+
+    def datetime_format
+      DATETIME_FORMAT
+    end
+
+    def pop_tags(count = 1)
+      current_tags.pop(count)
+    end
+
+    def push_tags(*tags)
+      tags.flatten.reject{|t| t.nil? || t.to_s.strip == '' }.tap do |clean_tags|
+        current_tags.concat(clean_tags)
+      end
+    end
+
+    def tagged(*tags)
+      clean_tags = push_tags(tags)
+      yield
+    ensure
+      pop_tags(clean_tags.size)
     end
 
     private
