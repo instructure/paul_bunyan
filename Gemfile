@@ -1,10 +1,6 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in logging.gemspec
+# Declare your gem's dependencies in logging.gemspec.
+# Bundler will treat runtime dependencies like base dependencies, and
+# development dependencies will be added by default to the :development group.
 gemspec
-
-group :development do
-  gem 'byebug', platforms: [:mri_20, :mri_21]
-  gem "debugger", platforms: [:mri_19]
-  gem 'simplecov', :require => false
-end
