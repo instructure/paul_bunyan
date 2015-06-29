@@ -63,9 +63,9 @@ describe Logging::Device do
 
       expect {
         device.with_temp_device(tmpfile) do
-          raise :this_is_an_error
+          raise 'This is my error...'
         end
-      }.to raise_error
+      }.to raise_error RuntimeError
     end
 
     after(:each) do

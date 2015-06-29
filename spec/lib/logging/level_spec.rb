@@ -15,7 +15,7 @@ module Logging
       end
 
       it "rejects non-integer strings" do
-        expect{ Logging::Level.try_parse_integer_level('warn') }.to raise_error
+        expect{ Logging::Level.try_parse_integer_level('warn') }.to raise_error ArgumentError
       end
     end
 
@@ -23,7 +23,7 @@ module Logging
       it "accepts log level strings" do
         expect(Logging::Level.try_parse_string_level('debug')).to eq ::Logger::DEBUG
         %w(Fatal ERROR warn info DeBug).each do |level|
-          expect{ Logging::Level.try_parse_string_level(level) }.to_not raise_error
+          Logging::Level.try_parse_string_level(level)
         end
       end
 
@@ -32,7 +32,7 @@ module Logging
       end
 
       it "rejects strings that are not log levels" do
-        expect{ Logging::Level.try_parse_string_level('critical') }.to raise_error
+        expect{ Logging::Level.try_parse_string_level('critical') }.to raise_error UnknownLevelError
       end
     end
 
