@@ -3,7 +3,7 @@ begin
 rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
-
+require "wwtd/tasks"
 require 'rdoc/task'
 
 RDoc::Task.new(:rdoc) do |rdoc|
@@ -15,3 +15,5 @@ RDoc::Task.new(:rdoc) do |rdoc|
 end
 
 Bundler::GemHelper.install_tasks
+
+task default: "wwtd"

@@ -1,0 +1,9 @@
+bundler_args: ''
+language: ruby
+gemfile:
+  - spec/gemfiles/40.gemfile
+  - spec/gemfiles/41.gemfile
+  - spec/gemfiles/42.gemfile
+matrix:
+  exclude:
+script: bundle exec rspec

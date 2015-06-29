@@ -10,4 +10,4 @@ COPY . /usr/src/app
 USER root
 RUN chown -R docker:docker /usr/src/app/*
 USER docker
-CMD bundle exec rspec
+CMD bundle exec wwtd --parallel
