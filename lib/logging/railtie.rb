@@ -1,3 +1,5 @@
+require 'logging/rails_ext'
+
 module Logging
   class Railtie < ::Rails::Railtie
     config.before_initialize do
