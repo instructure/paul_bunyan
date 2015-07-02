@@ -7,7 +7,7 @@ ActiveRecord::Migrator.migrations_paths = [File.expand_path("../../spec/dummy/db
 require "rails/test_help"
 
 # Load support files
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+Dir[File.join(File.dirname(__FILE__), 'support', '**', '*.rb')].each { |f| require f }
 
 # Load fixtures from the engine
 if ActiveSupport::TestCase.respond_to?(:fixture_path=)
@@ -15,7 +15,10 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
   ActiveSupport::TestCase.fixtures :all
 end
 
+require 'pry'
+require 'securerandom'
 require "logging"
 
-RSpec.configure do |c|
+RSpec.configure do |config|
+  config.include NotificationHelpers
 end
