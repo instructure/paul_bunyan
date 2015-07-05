@@ -1,4 +1,5 @@
 require 'logging/rails_ext'
+require 'logging/railtie/log_subscriber'
 
 module Logging
   class Railtie < ::Rails::Railtie
