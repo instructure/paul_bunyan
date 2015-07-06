@@ -1,5 +1,7 @@
 require 'logging/rails_ext'
 require 'logging/railtie/log_subscriber'
+require 'action_controller/log_subscriber'
+require 'action_view/log_subscriber'
 
 module Logging
   class Railtie < ::Rails::Railtie
@@ -22,9 +24,10 @@ module Logging
 
     private
 
+    DEFAULT_LOGGERS = [ActionController::LogSubscriber, ActionView::LogSubscriber]
     def self.conditionally_unsubscribe(listener)
       delegate = listener.instance_variable_get(:@delegate)
-      if delegate.class == ActionController::LogSubscriber
+      if DEFAULT_LOGGERS.include?(delegate.class)
         ActiveSupport::Notifications.unsubscribe(listener)
       end
     end

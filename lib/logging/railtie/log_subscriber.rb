@@ -26,25 +26,31 @@ module Logging
   )
 
   class LogSubscriber < ActiveSupport::LogSubscriber
-    class << self
-      attr_reader :action_controller_events
-    end
 
     @action_controller_events = Set.new
+    @action_view_events = Set.new
 
-    # Register a new event for the action_controller namespace this
-    # subscriber should subscribe to.
-    #
-    # @param event_name [Symbol] the name of the event we'll subscribe to
-    def self.action_controller_event(event_name)
-      @action_controller_events << event_name
+    class << self
+      attr_reader :action_controller_events, :action_view_events
+
+      # Register a new event for the the specified namespace this
+      # subscriber should subscribe to.
+      #
+      # @param event_name [Symbol] the name of the event we'll subscribe to
+      %w{controller view}.each do |namespace_part|
+        namespace = "action_#{namespace_part}"
+        define_method "#{namespace}_event" do |event_name|
+          send("#{namespace}_events") << event_name
+        end
+      end
     end
 
     # Build an array of event patterns from the action_controller_events
     # set for use in finding subscriptions we should add and ones we should
     # remove from the default subscribers
     def self.event_patterns
-      action_controller_events.map{ |event| "#{event}.action_controller" }
+      action_controller_events.map{ |event| "#{event}.action_controller" } +
+        action_view_events.map { |event| "#{event}.action_view" }
     end
 
     # Subscribe to the events we've registered using action_controller_event
