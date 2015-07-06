@@ -124,12 +124,12 @@ module Logging
         expect(aggregator.status).to eq 200
       end
 
-      it 'must set the view time on the aggregator' do
-        expect(aggregator.view).to eq 220.038
+      it 'must set the view_runtime value on the aggregator' do
+        expect(aggregator.view_runtime).to eq 220.038
       end
 
-      it 'must set the db time on the aggregator' do
-        expect(aggregator.db).to eq 10.177
+      it 'must set the db_runtime value on the aggregator' do
+        expect(aggregator.db_runtime).to eq 10.177
       end
 
       context 'extracting the params' do
@@ -230,6 +230,74 @@ module Logging
 
       it "must set the transfer_time on the request aggregator's sent_file object" do
         expect(file_data.transfer_time).to be_within(1).of(240)
+      end
+    end
+
+    describe '#render_template(event)' do
+      let(:event) {
+        ActiveSupport::Notifications::Event.new(
+          'render_template.action_view',
+          Time.at(Time.now.to_f - 0.240),
+          Time.now,
+          SecureRandom.hex(5),
+          {
+            identifier: Rails.root.join('app', 'views', 'controller', 'index.html.erb'),
+            layout: Rails.root.join('app', 'views', 'application', 'application.html.erb'),
+          }.with_indifferent_access
+        )
+      }
+      let(:view_data) { aggregator.view }
+
+      before do
+        subject.render_template(event)
+      end
+
+      it 'must set the view attribute on the aggregator' do
+        expect(aggregator.view).to_not be_nil
+      end
+
+      it 'must capture the rendered template path' do
+        expect(view_data.path.to_s).to end_with('controller/index.html.erb')
+      end
+
+      it 'must capture the render run time' do
+        expect(view_data.runtime).to be_within(1).of(240)
+      end
+
+      it 'must capture the layout used' do
+        expect(view_data.layout.to_s).to end_with('application/application.html.erb')
+      end
+
+      it 'must remove the Rails root path from the rendered template path' do
+        expect(view_data.path.to_s).to_not start_with Rails.root.to_s
+      end
+
+      it 'must remove the default rails view path from the rendered template path' do
+        expect(view_data.path.to_s).to_not match /\A\/?app\/views\//
+      end
+    end
+
+    describe '#render_partial(event)' do
+      let(:event) {
+        ActiveSupport::Notifications::Event.new(
+          'render_partial.action_view',
+          Time.at(Time.now.to_f - 0.240),
+          Time.now,
+          SecureRandom.hex(5),
+          {
+            identifier: Rails.root.join('app', 'views', 'controller', '_form.html.erb'),
+          }.with_indifferent_access
+        )
+      }
+      let(:view_data) { aggregator.view }
+
+      before do
+        subject.render_partial(event)
+      end
+
+      it 'must add an object to the partials array on every call' do
+        subject.render_partial(event)
+        expect(aggregator.partials.size).to eq 2
       end
     end
   end

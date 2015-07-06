@@ -1,12 +1,15 @@
 require 'set'
 require 'active_support/log_subscriber'
 require 'action_controller/log_subscriber'
+require 'action_view/log_subscriber'
 require 'request_store'
 
 module Logging
   INTERNAL_PARAMS = ActionController::LogSubscriber::INTERNAL_PARAMS
+  VIEWS_PATTERN = ActionView::LogSubscriber::VIEWS_PATTERN
 
   FileTransfer = Struct.new(:path, :transfer_time)
+  RenderedTemplate = Struct.new(:path, :runtime, :layout)
   RequestAggregator = Struct.new(
     :method,
     :controller,
@@ -16,13 +19,15 @@ module Logging
     :request_id,
     :ip,
     :status,
-    :view,
-    :db,
+    :view_runtime,
+    :db_runtime,
     :params,
     :halting_filter,
     :sent_file,
     :redirect_location,
-    :sent_data
+    :sent_data,
+    :view,
+    :partials
   )
 
   class LogSubscriber < ActiveSupport::LogSubscriber
@@ -89,16 +94,15 @@ module Logging
     # the log line
     #
     # @param event [ActiveSupport::Notifications::Event]
+    ACTION_PAYLOAD_KEYS = [:method, :controller, :action, :format, :path, :request_id, :ip, :status, :view_runtime, :db_runtime]
     action_controller_event def process_action(event)
       payload = event.payload
-      [:method, :controller, :action, :format, :path, :request_id, :ip, :status].each do |attr|
+      ACTION_PAYLOAD_KEYS.each do |attr|
         aggregator[attr] = payload[attr]
       end
-      aggregator.view       = payload[:view_runtime]
-      aggregator.db         = payload[:db_runtime]
-      aggregator.params     = payload[:params].except(*INTERNAL_PARAMS)
+      aggregator.params = payload[:params].except(*INTERNAL_PARAMS)
 
-      logger.info { aggregator.to_h.reject{|_, value| value.nil? } }
+      logger.info { aggregator_without_nils }
     end
 
     action_controller_event def halted_callback(event)
@@ -119,6 +123,17 @@ module Logging
       aggregator.sent_data = FileTransfer.new(payload[:filename], event.duration)
     end
 
+    action_view_event def render_template(event)
+      aggregator.view = extract_render_data_from(event)
+     end
+
+    action_view_event def render_partial(event)
+      aggregator.partials ||= []
+      aggregator.partials << extract_render_data_from(event)
+    end
+    alias :render_collection :render_partial
+    action_view_event :render_collection
+
     def logger
       Logging.logger
     end
@@ -127,6 +142,32 @@ module Logging
 
     def aggregator
       RequestStore[:logging_request_aggregator] ||= RequestAggregator.new
+    end
+
+    def aggregator_without_nils
+      struct_without_nils(aggregator)
+    end
+
+    def clean_view_path(path)
+      return nil if path.nil?
+      path.sub(rails_root, '').sub(VIEWS_PATTERN, '')
+    end
+
+    def extract_render_data_from(event)
+      payload = event.payload
+      RenderedTemplate.new(
+        clean_view_path(payload[:identifier]),
+        event.duration,
+        clean_view_path(payload[:layout])
+      )
+    end
+
+    def rails_root
+      @rails_root ||= "#{Rails.root}/"
+    end
+
+    def struct_without_nils(struct)
+      struct.to_h.reject{ |_, value| value.nil? }
     end
   end
 end
