@@ -1,10 +1,7 @@
 #!/bin/bash
-rvm use ext-ruby-2.1.1-p76
 
-bundle check || bundle install
+set -e
 
-bundle exec rspec
-spec_status=$?
-
-# this line must be last!!
-exit $spec_status
+docker pull docker.insops.net/instructure/instructure-ruby:2.1
+docker-compose build
+docker-compose run test
