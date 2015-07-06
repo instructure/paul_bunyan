@@ -145,7 +145,16 @@ module Logging
     end
 
     def aggregator_without_nils
-      struct_without_nils(aggregator)
+      struct_without_nils(aggregator).inject({}) { |data, (key, value)|
+        if Struct === value
+          new_data = {key => struct_without_nils(value)}
+        elsif Array === value
+          new_data = {key => value.map{ |v| struct_without_nils(v) }}
+        else
+          new_data = {key => value}
+        end
+        data.merge(new_data)
+      }
     end
 
     def clean_view_path(path)
