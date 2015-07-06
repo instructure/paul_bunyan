@@ -12,6 +12,10 @@ module Logging
       LogSubscriber.instance_variable_set(:@action_controller_events, original_events)
     end
 
+    before do
+      RequestStore.clear!
+    end
+
     describe '.action_controller_event(event_name)' do
       around(:each) do |example|
         preserving_event_lists do
@@ -136,6 +140,96 @@ module Logging
         it 'must include params passed to the controller action' do
           expect(aggregator.params).to include "id" => "42", "foo" => "bar"
         end
+      end
+    end
+
+    describe '#halted_callback(event)' do
+      let(:event) {
+        ActiveSupport::Notifications::Event.new(
+          'halted_callback.action_controller',
+          Time.now,
+          Time.at(Time.now.to_f - 0.240),
+          SecureRandom.hex(5),
+          {filter: described_class}.with_indifferent_access
+        )
+      }
+
+      before do
+        subject.halted_callback(event)
+      end
+
+      it 'must set the halting_filter field on the request aggregator' do
+        expect(aggregator.halting_filter).to eq 'Logging::LogSubscriber'
+      end
+    end
+
+    describe '#send_file(event)' do
+      let(:event) {
+        ActiveSupport::Notifications::Event.new(
+          'send_file.action_controller',
+          Time.at(Time.now.to_f - 0.240),
+          Time.now,
+          SecureRandom.hex(5),
+          {path: '/path/to/a/file'}.with_indifferent_access
+        )
+      }
+      let(:file_data) { aggregator.sent_file }
+
+      before do
+        subject.send_file(event)
+      end
+
+      it "must set the path field on the request aggregator's sent_file object" do
+        expect(file_data.path).to eq '/path/to/a/file'
+      end
+
+      it "must set the transfer_time on the request aggregator's sent_file object" do
+        expect(file_data.transfer_time).to be_within(1).of(240)
+      end
+    end
+
+    describe '#redirect_to(event)' do
+      let(:event) {
+        ActiveSupport::Notifications::Event.new(
+          'redirect_to.action_controller',
+          Time.now,
+          Time.at(Time.now.to_f - 0.240),
+          SecureRandom.hex(5),
+          {location: 'https://example.com/another/resource'}.with_indifferent_access
+        )
+      }
+
+      before do
+        subject.redirect_to(event)
+      end
+
+      it 'must set the redirect_location field on the request aggregator' do
+        expect(aggregator.redirect_location).to eq 'https://example.com/another/resource'
+      end
+    end
+
+    describe '#send_data(event)' do
+      let(:event) {
+        ActiveSupport::Notifications::Event.new(
+          'send_data.action_controller',
+          Time.at(Time.now.to_f - 0.240),
+          Time.now,
+          SecureRandom.hex(5),
+          {filename: '/path/to/a/file'}.with_indifferent_access
+        )
+      }
+      let(:file_data) { aggregator.sent_data }
+
+      before do
+        subject.send_data(event)
+      end
+
+      it "must set the path field on the request aggregator's sent_file object" do
+        expect(file_data.path).to eq '/path/to/a/file'
+      end
+
+      it "must set the transfer_time on the request aggregator's sent_file object" do
+        expect(file_data.transfer_time).to be_within(1).of(240)
       end
     end
   end
