@@ -24,7 +24,7 @@ module Logging
         @logger = LOGGER_CLASS.new(nil)
         self.device = Device.new(logdev, DEFAULT_OPTS.merge(options))
       end
-      self.level = coerce_level(options[:level]) if options[:level]
+      self.level = options[:level] if options[:level]
     end
 
     attr_reader :logger
@@ -75,13 +75,7 @@ module Logging
     end
 
     def level=(value)
-      @logger.level = coerce_level(value)
-    end
-
-    private
-
-    def coerce_level(level)
-      Level.parse_level(level)
+      @logger.level = Logging::Level.coerce_level(value)
     end
   end
 end

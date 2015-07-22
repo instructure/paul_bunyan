@@ -1,46 +1,78 @@
-require "spec_helper"
+require 'spec_helper'
 
-module Logging
-  describe Level do
-
-    context "#try_parse_integer_level" do
-      it "accepts integers" do
-        expect(Logging::Level.try_parse_integer_level(0)).to eq 0
-        expect(Logging::Level.try_parse_integer_level(1)).to eq 1
-      end
-
-      it "accepts integer strings" do
-        expect(Logging::Level.try_parse_integer_level('0')).to eq 0
-        expect(Logging::Level.try_parse_integer_level('1')).to eq 1
-      end
-
-      it "rejects non-integer strings" do
-        expect{ Logging::Level.try_parse_integer_level('warn') }.to raise_error ArgumentError
-      end
-    end
-
-    context "#try_parse_string_level" do
-      it "accepts log level strings" do
-        expect(Logging::Level.try_parse_string_level('debug')).to eq ::Logger::DEBUG
-        %w(Fatal ERROR warn info DeBug).each do |level|
-          Logging::Level.try_parse_string_level(level)
+describe Logging::Level do
+  describe '::coerce_level' do
+    it 'accepts integers', :aggregate_failures do
+      (0..5).each do |level|
+        aggregate_failures do
+          expect(Logging::Level.coerce_level(level)).to eq(level)
         end
       end
+    end
 
-      it 'must accept symbols matching a valid level' do
-        expect(Level.try_parse_string_level(:debug)).to eq ::Logger::DEBUG
-      end
+    it 'rejects integers that are out-of-range', :aggregate_failures do
+      expect { Logging::Level.coerce_level(-1) }.to raise_error(Logging::UnknownLevelError)
+      expect { Logging::Level.coerce_level(6) }.to raise_error(Logging::UnknownLevelError)
+    end
 
-      it "rejects strings that are not log levels" do
-        expect{ Logging::Level.try_parse_string_level('critical') }.to raise_error UnknownLevelError
+    it 'accepts integer strings', :aggregate_failures do
+      (0..5).each do |level|
+        aggregate_failures do
+          expect(Logging::Level.coerce_level(level.to_s)).to eq(level)
+        end
       end
     end
 
-    context "#parse_level" do
-      it "accepts strings" do
-        expect(Logging::Level.parse_level('error')).to eq ::Logger::ERROR
-        expect(Logging::Level.parse_level('warn')).to eq ::Logger::WARN
+    it 'rejects integer strings that are out-of-range', :aggregate_failures do
+      expect { Logging::Level.coerce_level(-1) }.to raise_error(Logging::UnknownLevelError)
+      expect { Logging::Level.coerce_level(6) }.to raise_error(Logging::UnknownLevelError)
+    end
+
+    it 'accepts integer strings with whitespace', :aggregate_failures do
+      (0..5).each do |level|
+        aggregate_failures do
+          expect(Logging::Level.coerce_level(" \t#{level}")).to eq(level)
+          expect(Logging::Level.coerce_level("#{level} \t")).to eq(level)
+        end
       end
+    end
+
+    it 'accepts log level strings', :aggregate_failures do
+      {
+        'DeBug' => Logger::DEBUG,
+        'Info' => Logger::INFO,
+        'warn' => Logger::WARN,
+        'ERROR' => Logger::ERROR,
+        'FataL' => Logger::FATAL,
+        'uNKNOWn' => Logger::UNKNOWN
+      }.each do |k, v|
+        aggregate_failures do
+          expect(Logging::Level.coerce_level(k)).to eq(v)
+        end
+      end
+    end
+
+    it 'rejects invalid log level strings' do
+      expect { Logging::Level.coerce_level('critical') }.to raise_error(Logging::UnknownLevelError)
+    end
+
+    it 'accepts log level symbols', :aggregate_failures do
+      {
+        DeBug: Logger::DEBUG,
+        Info: Logger::INFO,
+        warn: Logger::WARN,
+        ERROR: Logger::ERROR,
+        FataL: Logger::FATAL,
+        uNKNOWn: Logger::UNKNOWN
+      }.each do |k, v|
+        aggregate_failures do
+          expect(Logging::Level.coerce_level(k)).to eq(v)
+        end
+      end
+    end
+
+    it 'rejects invalid log level symbols' do
+      expect { Logging::Level.coerce_level(:critical) }.to raise_error(Logging::UnknownLevelError)
     end
   end
 end

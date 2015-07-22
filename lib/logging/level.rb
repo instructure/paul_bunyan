@@ -1,41 +1,28 @@
-require 'logger'
-
-# Methods that shouldn't be included in other classes, but are nevertheless
-# useful to the Logging methods
-
 module Logging
   module Level
-    LOGGING_LEVELS = {
-      'fatal' => ::Logger::FATAL,
-      'error' => ::Logger::ERROR,
-      'warn'  => ::Logger::WARN,
-      'info'  => ::Logger::INFO,
-      'debug' => ::Logger::DEBUG
-    }
+    LEVEL_MAP = {
+      DEBUG: Logger::DEBUG,
+      INFO: Logger::INFO,
+      WARN: Logger::WARN,
+      ERROR: Logger::ERROR,
+      FATAL: Logger::FATAL,
+      UNKNOWN: Logger::UNKNOWN
+    }.freeze
+    LOGGING_LEVEL_KEYS = LEVEL_MAP.keys.freeze
+    LOGGING_LEVELS = (Logger::DEBUG..Logger::UNKNOWN).freeze
 
-    def self.parse_level(level)
-      return ::Logger::DEBUG if level.nil?
-      try_parse_integer_level(level)
-    rescue ArgumentError, TypeError
-      try_parse_string_level(level)
-    end
-
-    def self.try_parse_string_level(level)
-      unless String === level || Symbol === level
-        raise ArgumentError, "String or Symbol expected got #{ level.class } (#{level})"
+    def self.coerce_level(level)
+      coerced_level = level || Logger::DEBUG
+      if level =~ /\A\s*\d+\s*\z/
+        coerced_level = level.to_i
+      elsif level.is_a?(String) || level.is_a?(Symbol)
+        coerced_level = LEVEL_MAP[level.upcase.to_sym]
       end
-      LOGGING_LEVELS.fetch(level.to_s.downcase) {
-        raise UnknownLevelError, "Can't set log level to '#{ level }'"
-      }
-    end
 
-    def self.try_parse_integer_level(int_level)
-      level = Integer(int_level)
-      if LOGGING_LEVELS.values.include?(level)
-        level
-      else
-        raise UnknownLevelError, "Can't set log level to '#{level}' (0 to 4 expected)"
+      unless LOGGING_LEVELS.cover?(coerced_level)
+        fail UnknownLevelError, "Unknown logging level #{level}. Please try one of: #{LOGGING_LEVEL_KEYS.join(', ')}."
       end
+      coerced_level
     end
   end
 end
