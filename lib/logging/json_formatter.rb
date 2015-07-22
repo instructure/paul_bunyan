@@ -1,42 +1,23 @@
-require 'thread'
 require 'json'
-require 'term/ansicolor'
+require 'thread'
 
 module Logging
   class JSONFormatter
-    include Term::ANSIColor
-
     DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%3N'
 
-    SEVERITY_COLORS = Hash.new {|h, k|
-      :white
-    }.tap { |colors|
-      colors['FATAL'] = :red
-      colors['ERROR'] = :red
-      colors['WARN'] = :yellow
-      colors['DEBUG'] = :faint
-    }
-
-    def initialize(logger, opts={})
-      @logger = logger
-      @opts = opts
-    end
-
     def call(severity, time, progname, msg)
-      with_color severity do
-        metadata = {
-          "ts"       => time.utc.strftime(DATETIME_FORMAT),
-          "unix_ts"  => time.to_f,
-          "severity" => severity,
-          "pid"      => $$,
-        }
-        metadata['program'] = progname if progname
-        metadata['tags'] = current_tags unless current_tags.empty?
+      metadata = {
+        "ts"       => time.utc.strftime(DATETIME_FORMAT),
+        "unix_ts"  => time.to_f,
+        "severity" => severity,
+        "pid"      => $$,
+      }
+      metadata['program'] = progname if progname
+      metadata['tags'] = current_tags unless current_tags.empty?
 
-        message_data = format_message(msg)
+      message_data = format_message(msg)
 
-        JSON::generate(merge_metadata_and_message(metadata, message_data)) + "\n"
-      end
+      JSON::generate(merge_metadata_and_message(metadata, message_data)) + "\n"
     end
 
     def clear_tags!
@@ -97,7 +78,7 @@ module Logging
     end
 
     def format_string(message)
-      { "message" => uncolored(message.strip) }
+      { "message" => strip_ansi(message.strip) }
     end
 
     def format_generic_object(object)
@@ -127,20 +108,13 @@ module Logging
       }
     end
 
-    def with_color(severity, &block)
-      if use_color?
-        self.send(SEVERITY_COLORS[severity], &block)
-      else
-        yield
+    ANSI_REGEX = /(?:\e\[|\u009b)(?:\d{1,3}(?:;\d{0,3})*)?[0-9A-MRcf-npqrsuy]/
+    def strip_ansi(value)
+      if value.respond_to?(:to_str)
+        value.to_str.gsub(ANSI_REGEX, '')
+      elsif value
+        value.gsub(ANSI_REGEX, '')
       end
-    end
-
-    def use_color?
-      @opts.has_key?(:color) ? @opts[:color] : tty?
-    end
-
-    def tty?
-      @logger && @logger.device.tty?
     end
   end
 end

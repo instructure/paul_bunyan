@@ -18,7 +18,7 @@ module Logging
 
     describe '#push_tags(*tags)' do
       before do
-        logger.formatter = JSONFormatter.new(logger)
+        logger.formatter = JSONFormatter.new
       end
 
       it 'must add tags to the formatter' do

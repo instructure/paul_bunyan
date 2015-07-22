@@ -43,7 +43,7 @@ module Logging
           log_like
         else
           HelpfulLogger.new(log_like, options).tap do |logger|
-            logger.formatter = JSONFormatter.new(logger)
+            logger.formatter = JSONFormatter.new
           end
         end
     end

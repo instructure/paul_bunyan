@@ -3,7 +3,7 @@ require "time"
 
 module Logging
   describe JSONFormatter do
-    let(:formatter) { JSONFormatter.new(nil) }
+    let(:formatter) { JSONFormatter.new }
     let(:time) { Time.new(2015, 2, 7, 13, 52, 3.141592) }
 
     describe "#call(severity, time, progname, msg)" do
@@ -76,7 +76,7 @@ module Logging
         end
 
         it 'must remove ANSI color codes' do
-          output = formatter.call('', time, '', "\e[36mcolored message!")
+          output = formatter.call('', time, '', "\e[36;46mcolored message!")
           object = JSON.parse(output)
           expect(object['message']).to eq 'colored message!'
         end
