@@ -1,5 +1,6 @@
 require "logger"
 
+require "logging/log_relayer"
 require "logging/version"
 require "logging/level"
 require "logging/device"
