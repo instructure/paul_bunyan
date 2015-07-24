@@ -1,12 +1,12 @@
-require "logger"
+require 'logger'
 
-require "logging/log_relayer"
-require "logging/version"
-require "logging/level"
-require "logging/device"
-require "logging/helpful_logger"
-require "logging/json_formatter"
-require 'logging/railtie' if defined? ::Rails::Railtie
+require_relative 'logging/json_formatter'
+require_relative 'logging/level'
+require_relative 'logging/log_relayer'
+require_relative 'logging/text_formatter'
+require_relative 'logging/version'
+
+require_relative 'logging/railtie' if defined? ::Rails::Railtie
 
 # Example Usage:
 #
@@ -20,6 +20,7 @@ require 'logging/railtie' if defined? ::Rails::Railtie
 #
 module Logging
   class Error < StandardError; end
+  class UnknownFormatterError < Error; end
   class UnknownLevelError < Error; end
 
   # The ONE method we care about.
@@ -28,25 +29,39 @@ module Logging
   end
 
   class << self
-    # The singleton @logger object for the whole app
+    attr_accessor :default_formatter_type
+    Logging.default_formatter_type = :json
+
     def logger
-      @logger ||= set_logger(STDOUT)
+      create_logger(STDOUT) unless @logger
+      @logger
     end
 
-    def logger=(log_like)
-      set_logger(log_like)
+    def create_logger(logdev, shift_age = nil, shift_size = nil, formatter_type = Logging.default_formatter_type)
+      logger = Logger.new(logdev, shift_age, shift_size)
+      logger.formatter = default_formatter(formatter_type) unless formatter_type.nil?
+      add_logger(logger)
     end
 
-    def set_logger(log_like, options = {})
-      @logger =
-        case log_like
-        when HelpfulLogger then
-          log_like
-        else
-          HelpfulLogger.new(log_like, options).tap do |logger|
-            logger.formatter = JSONFormatter.new
-          end
-        end
+    def add_logger(logger)
+      @logger ||= LogRelayer.new
+      @logger.add_logger(logger)
+      logger
+    end
+
+    def remove_logger(logger)
+      @logger.remove_logger(logger)
+    end
+
+    private def default_formatter(formatter_type)
+      case formatter_type
+      when :json
+        JSONFormatter.new
+      when :text
+        TextFormatter.new
+      else
+        fail UnknownFormatterError, "Unknown formatter type #{formatter_type}"
+      end
     end
   end
 end

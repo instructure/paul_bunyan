@@ -6,12 +6,19 @@ require 'action_view/log_subscriber'
 module Logging
   class Railtie < ::Rails::Railtie
     config.before_initialize do
-      STDOUT.sync = true
-      Rails.logger = Logging.set_logger(STDOUT)
-      Logging.logger.level = ENV['LOG_LEVEL'] || ::Rails.application.config.log_level || "INFO"
+      log_level = Logging::Level.coerce_level(ENV['LOG_LEVEL'] || ::Rails.application.config.log_level || 'INFO')
 
-      unsubscribe_default_log_subscribers
-      LogSubscriber.subscribe_to_events
+      STDOUT.sync = true
+      new_logger = Logging.add_logger(ActiveSupport::Logger.new(STDOUT))
+      new_logger.level = log_level
+
+      unless ::Rails.env.development? || ::Rails.env.test?
+        new_logger.formatter = JSONFormatter.new
+        unsubscribe_default_log_subscribers
+        LogSubscriber.subscribe_to_events
+      end
+
+      Rails.logger = Logging.logger
     end
 
     def self.unsubscribe_default_log_subscribers
@@ -22,14 +29,10 @@ module Logging
       end
     end
 
-    private
-
     DEFAULT_LOGGERS = [ActionController::LogSubscriber, ActionView::LogSubscriber]
     def self.conditionally_unsubscribe(listener)
       delegate = listener.instance_variable_get(:@delegate)
-      if DEFAULT_LOGGERS.include?(delegate.class)
-        ActiveSupport::Notifications.unsubscribe(listener)
-      end
+      ActiveSupport::Notifications.unsubscribe(listener) if DEFAULT_LOGGERS.include?(delegate.class)
     end
   end
 end

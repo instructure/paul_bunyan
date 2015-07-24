@@ -7,6 +7,8 @@ module Logging
         @action_controller_subscriber = ActiveSupport::LogSubscriber.subscribers.find{|s|
           s.class == ActionController::LogSubscriber
         }
+
+        Railtie.unsubscribe_default_log_subscribers
       end
 
       after do
