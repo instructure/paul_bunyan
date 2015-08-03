@@ -37,7 +37,7 @@ module Logging
       @logger
     end
 
-    def create_logger(logdev, shift_age = nil, shift_size = nil, formatter_type = Logging.default_formatter_type)
+    def create_logger(logdev, shift_age = 0, shift_size = 1048576, formatter_type: Logging.default_formatter_type)
       logger = Logger.new(logdev, shift_age, shift_size)
       logger.formatter = default_formatter(formatter_type) unless formatter_type.nil?
       add_logger(logger)

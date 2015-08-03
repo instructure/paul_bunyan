@@ -89,7 +89,7 @@ describe Logging do
       Logging.default_formatter_type = :json
       expect(Logger).to receive(:new).and_return(logger)
       expect(logger).to receive(:formatter=).with(instance_of(Logging::TextFormatter))
-      Logging.create_logger(device, nil, nil, :text)
+      Logging.create_logger(device, formatter_type: :text)
     end
 
     def default_formatter_type_call
