@@ -2,13 +2,13 @@ require 'spec_helper'
 
 module Logging
   RSpec.describe Railtie do
-    describe '.unsubscribe_default_log_subscribers' do
+    describe '#unsubscribe_default_log_subscribers' do
       before do
         @action_controller_subscriber = ActiveSupport::LogSubscriber.subscribers.find{|s|
           s.class == ActionController::LogSubscriber
         }
 
-        Railtie.unsubscribe_default_log_subscribers
+        Railtie.instance.unsubscribe_default_log_subscribers
       end
 
       after do

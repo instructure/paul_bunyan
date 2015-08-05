@@ -3,6 +3,20 @@ require 'spec_helper'
 RSpec.describe ActionController::Base do
   let(:request_id) { '5ab8b021-71bf-40f9-97cc-136f7b626a66' }
 
+  around :each do |example|
+    begin
+      original_logger = Logging.logger.primary_logger
+      null_logger = Logger.new('/dev/null')
+      Logging.add_logger(null_logger)
+      Logging.remove_logger(original_logger)
+
+      example.run
+    ensure
+      Logging.add_logger(original_logger)
+      Logging.remove_logger(null_logger)
+    end
+  end
+
   before :each do
     subject.request = ActionDispatch::TestRequest.new({
       'action_dispatch.request_id' => request_id,
@@ -11,9 +25,10 @@ RSpec.describe ActionController::Base do
     subject.response = ActionDispatch::TestResponse.new
 
     def subject.index(*args)
-      render text: 'OK'
+      head :ok
     end
   end
+
 
   describe '.process_action(*args)' do
     context 'active support notification events' do
