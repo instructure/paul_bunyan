@@ -17,7 +17,7 @@ end
 require 'pry'
 require 'securerandom'
 require 'stringio'
-require "logging"
+require 'paul_bunyan'
 
 RSpec.configure do |config|
   config.include NotificationHelpers

@@ -3,7 +3,7 @@ MAINTAINER Tyler Pickett <tpickett@instructure.com>
 
 WORKDIR /usr/src/app
 COPY Gemfile* *.gemspec /usr/src/app/
-COPY lib/logging/version.rb /usr/src/app/lib/logging/
+COPY lib/paul_bunyan/version.rb /usr/src/app/lib/paul_bunyan/
 RUN bundle install
 
 COPY . /usr/src/app

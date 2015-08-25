@@ -3,15 +3,15 @@
 require 'bundler/setup'
 require_relative '../lib/logging'
 
-logger = Logging.set_logger(STDOUT)
+logger = PaulBunyan.set_logger(STDOUT)
 puts "JSONFormatter"
-logger.debug("LoggingDemo") { "This is my debug message" }
-logger.info("LoggingDemo") { "This is my info message" }
-logger.info("loggingDemo") { {foo: "bar", baz: "qux"} }
-logger.warn("LoggingDemo") { "This is my warn message" }
+logger.debug("PaulBunyanDemo") { "This is my debug message" }
+logger.info("PaulBunyanDemo") { "This is my info message" }
+logger.info("PaulBunyanDemo") { {foo: "bar", baz: "qux"} }
+logger.warn("PaulBunyanDemo") { "This is my warn message" }
 begin
   raise "heck"
 rescue => ex
-  logger.error("LoggingDemo") { ex }
+  logger.error("PaulBunyanDemo") { ex }
 end
-logger.fatal("LoggingDemo") { "This is my fatal message" }
+logger.fatal("PaulBunyanDemo") { "This is my fatal message" }

@@ -1,15 +1,15 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'logging/version'
+require 'paul_bunyan/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'logging'
-  spec.version       = Logging::VERSION
-  spec.authors       = ['Duane Johnson', 'Mark Severson', 'Tyler Pickett']
-  spec.email         = ['duane@instructure.com', 'markse@instructure.com', 'tpickett@instructure.com']
+  spec.name          = 'paul_bunyan'
+  spec.version       = PaulBunyan::VERSION
+  spec.authors       = ['Duane Johnson', 'Kenneth Romney', 'Mark Severson', 'Tyler Pickett']
+  spec.email         = ['duane@instructure.com', 'kromney@instructure.com', 'markse@instructure.com', 'tpickett@instructure.com']
   spec.summary       = 'Logging for all the things'
-  spec.description   = 'Logging for all the things'
+  spec.description   = "Extensions and enhancements to Ruby's built in Logger class. Extensions include: multiple output streams, JSON formatting for easy aggregation, and a Railtie to set some sane(ish) defaults for production Rails environments."
   spec.homepage      = ''
   spec.license       = 'MIT'
 

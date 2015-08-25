@@ -1,9 +1,9 @@
-require 'logging/rails_ext'
-require 'logging/railtie/log_subscriber'
+require 'paul_bunyan/rails_ext'
+require 'paul_bunyan/railtie/log_subscriber'
 require 'action_controller/log_subscriber'
 require 'action_view/log_subscriber'
 
-module Logging
+module PaulBunyan
   class Railtie < ::Rails::Railtie
     DEFAULT_LOGGERS = [ActionController::LogSubscriber, ActionView::LogSubscriber].freeze
 
@@ -27,8 +27,8 @@ module Logging
     initializer 'initalize_logger.logging', group: :all, before: :initialize_logger do |app|
       logging_config = config.logging
 
-      new_logger = Logging.add_logger(ActiveSupport::Logger.new(log_target(app.config)))
-      new_logger.level = Logging::Level.coerce_level(ENV['LOG_LEVEL'] || ::Rails.application.config.log_level || 'INFO')
+      new_logger = PaulBunyan.add_logger(ActiveSupport::Logger.new(log_target(app.config)))
+      new_logger.level = PaulBunyan::Level.coerce_level(ENV['LOG_LEVEL'] || ::Rails.application.config.log_level || 'INFO')
       new_logger.formatter = logging_config.formatter
 
       if logging_config.handle_request_logging
@@ -36,7 +36,7 @@ module Logging
         LogSubscriber.subscribe_to_events
       end
 
-      Rails.logger = Logging.logger
+      Rails.logger = PaulBunyan.logger
     end
 
     def conditionally_unsubscribe(listener)

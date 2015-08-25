@@ -1,10 +1,16 @@
-# Logging
+# Paul Bunyan (formerly: Logging)
 
-Logging is a re-usable component with a globally accessible Logger, e.g.
+PaulBunyan is a re-usable component with a globally accessible Logger with extra
+support for handling logging in Rails.
 
 ```
-include Logging::Logger
-logger.warn "blah"
+class Foo
+  include PaulBunyan
+
+  def bar
+    logger.warn "blah"
+  end
+end
 ```
 
 Also included is a Railtie that overrides the default rails logger to always
@@ -16,7 +22,7 @@ Rails 3 or newer since that's when Railties were introduced.
 
 Add this line to your application's Gemfile:
 
-    gem 'logging'
+    gem 'paul_bunyan'
 
 And then execute:
 
@@ -24,18 +30,18 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install logging
+    $ gem install paul_bunyan
 
 ## Usage
 
 ### Non-Rails projects:
 
 ```
-require 'logging'
+require 'paul_bunyan'
 
-include Logging::Logger
+include PaulBunyan::Logger
 
-Logging.set_logger(STDOUT)
+PaulBunyan.set_logger(STDOUT)
 
 logger.warn "blah"
 ```

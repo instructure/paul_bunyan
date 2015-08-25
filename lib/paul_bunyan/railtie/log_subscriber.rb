@@ -4,7 +4,7 @@ require 'action_controller/log_subscriber'
 require 'action_view/log_subscriber'
 require 'request_store'
 
-module Logging
+module PaulBunyan
   INTERNAL_PARAMS = ActionController::LogSubscriber::INTERNAL_PARAMS
   VIEWS_PATTERN = ActionView::LogSubscriber::VIEWS_PATTERN
 
@@ -135,7 +135,7 @@ module Logging
     action_view_event :render_collection
 
     def logger
-      Logging.logger
+      PaulBunyan.logger
     end
 
     private

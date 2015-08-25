@@ -2,14 +2,14 @@ require 'set'
 require 'spec_helper'
 require 'stringio'
 
-describe Logging::LogRelayer do
+describe PaulBunyan::LogRelayer do
   let(:device) { StringIO.new }
 
-  let(:empty_relayer) { Logging::LogRelayer.new }
+  let(:empty_relayer) { PaulBunyan::LogRelayer.new }
 
   let(:primary) { double('primary logger') }
   let(:single_relayer) do
-    Logging::LogRelayer.new.tap do |relayer|
+    PaulBunyan::LogRelayer.new.tap do |relayer|
       relayer.add_logger(primary)
     end
   end

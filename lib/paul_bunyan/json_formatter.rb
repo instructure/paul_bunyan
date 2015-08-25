@@ -1,7 +1,7 @@
 require 'json'
 require 'thread'
 
-module Logging
+module PaulBunyan
   class JSONFormatter
     DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%3N'
 
@@ -70,6 +70,8 @@ module Logging
     end
 
     def format_exception(exception)
+      # TODO: capture the exception cause if it is present and handle the case where
+      # cause isn't actually an exception (such as Parslet::ParseFailed#cause)
       {
         "exception.class" => exception.class.to_s,
         "exception.backtrace" => exception.backtrace,

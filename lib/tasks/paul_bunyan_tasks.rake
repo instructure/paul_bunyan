@@ -1,4 +1,4 @@
 # desc "Explaining what the task does"
-# task :logging do
+# task :paul_bunyan do
 #   # Task goes here
 # end

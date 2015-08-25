@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Logging
+module PaulBunyan
   RSpec.describe LogSubscriber do
     let(:aggregator) { subject.send(:aggregator) }
 
@@ -84,12 +84,12 @@ module Logging
       }
 
       before do
-        allow(::Logging.logger).to receive(:info)
+        allow(::PaulBunyan.logger).to receive(:info)
         subject.process_action(event)
       end
 
       it 'it must log the contents of the aggregator to the specified logger at the info level' do
-        expect(::Logging.logger).to have_received(:info)
+        expect(::PaulBunyan.logger).to have_received(:info)
       end
 
       it 'must set the method on the aggregator' do
@@ -159,7 +159,7 @@ module Logging
       end
 
       it 'must set the halting_filter field on the request aggregator' do
-        expect(aggregator.halting_filter).to eq 'Logging::LogSubscriber'
+        expect(aggregator.halting_filter).to eq 'PaulBunyan::LogSubscriber'
       end
     end
 

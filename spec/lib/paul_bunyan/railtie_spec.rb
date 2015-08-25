@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Logging
+module PaulBunyan
   RSpec.describe Railtie do
     describe '#unsubscribe_default_log_subscribers' do
       before do

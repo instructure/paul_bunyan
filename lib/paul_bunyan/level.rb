@@ -1,4 +1,4 @@
-module Logging
+module PaulBunyan
   module Level
     LEVEL_MAP = {
       DEBUG: Logger::DEBUG,

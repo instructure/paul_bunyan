@@ -5,15 +5,15 @@ RSpec.describe ActionController::Base do
 
   around :each do |example|
     begin
-      original_logger = Logging.logger.primary_logger
+      original_logger = PaulBunyan.logger.primary_logger
       null_logger = Logger.new('/dev/null')
-      Logging.add_logger(null_logger)
-      Logging.remove_logger(original_logger)
+      PaulBunyan.add_logger(null_logger)
+      PaulBunyan.remove_logger(original_logger)
 
       example.run
     ensure
-      Logging.add_logger(original_logger)
-      Logging.remove_logger(null_logger)
+      PaulBunyan.add_logger(original_logger)
+      PaulBunyan.remove_logger(null_logger)
     end
   end
 

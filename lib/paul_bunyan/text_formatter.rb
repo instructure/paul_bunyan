@@ -1,4 +1,4 @@
-module Logging
+module PaulBunyan
   class TextFormatter < Logger::Formatter
     def call(severity, time, progname, msg)
       if msg.is_a?(Hash)

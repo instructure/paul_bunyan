@@ -1,43 +1,43 @@
 require 'logger'
 
-require_relative 'logging/json_formatter'
-require_relative 'logging/level'
-require_relative 'logging/log_relayer'
-require_relative 'logging/text_formatter'
-require_relative 'logging/version'
+require_relative 'paul_bunyan/json_formatter'
+require_relative 'paul_bunyan/level'
+require_relative 'paul_bunyan/log_relayer'
+require_relative 'paul_bunyan/text_formatter'
+require_relative 'paul_bunyan/version'
 
-require_relative 'logging/railtie' if defined? ::Rails::Railtie
+require_relative 'paul_bunyan/railtie' if defined? ::Rails::Railtie
 
 # Example Usage:
 #
 #   class MyClass
-#     include Logging
+#     include PaulBunyan
 #
 #     def initialize
 #       logger.info{ "something is working!" }
 #     end
 #   end
 #
-module Logging
+module PaulBunyan
   class Error < StandardError; end
   class UnknownFormatterError < Error; end
   class UnknownLevelError < Error; end
 
   # The ONE method we care about.
   def logger
-    Logging.logger
+    PaulBunyan.logger
   end
 
   class << self
     attr_accessor :default_formatter_type
-    Logging.default_formatter_type = :json
+    PaulBunyan.default_formatter_type = :json
 
     def logger
       create_logger(STDOUT) unless @logger
       @logger
     end
 
-    def create_logger(logdev, shift_age = 0, shift_size = 1048576, formatter_type: Logging.default_formatter_type)
+    def create_logger(logdev, shift_age = 0, shift_size = 1048576, formatter_type: PaulBunyan.default_formatter_type)
       logger = Logger.new(logdev, shift_age, shift_size)
       logger.formatter = default_formatter(formatter_type) unless formatter_type.nil?
       add_logger(logger)
@@ -65,3 +65,6 @@ module Logging
     end
   end
 end
+
+# For backwards compatibility with applications that used this prior to the rename
+Logging = PaulBunyan

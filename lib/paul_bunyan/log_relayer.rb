@@ -1,7 +1,7 @@
 require 'forwardable'
 require 'set'
 
-module Logging
+module PaulBunyan
   class LogRelayer
     extend Forwardable
 

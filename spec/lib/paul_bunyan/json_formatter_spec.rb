@@ -1,7 +1,7 @@
 require "spec_helper"
 require "time"
 
-module Logging
+module PaulBunyan
   describe JSONFormatter do
     let(:formatter) { JSONFormatter.new }
     let(:time) { Time.new(2015, 2, 7, 13, 52, 3.141592) }
