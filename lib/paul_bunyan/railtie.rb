@@ -39,6 +39,10 @@ module PaulBunyan
       Rails.logger = PaulBunyan.logger
     end
 
+    console do
+      PaulBunyan.logger.formatter = TextFormatter.new(include_metadata: false)
+    end
+
     def conditionally_unsubscribe(listener)
       delegate = listener.instance_variable_get(:@delegate)
       ActiveSupport::Notifications.unsubscribe(listener) if DEFAULT_LOGGERS.include?(delegate.class)
