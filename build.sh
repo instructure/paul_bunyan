@@ -2,6 +2,5 @@
 
 set -e
 
-docker pull docker.insops.net/instructure/instructure-ruby:2.1
-docker-compose build
+docker-compose build --pull
 docker-compose run test

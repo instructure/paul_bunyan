@@ -14,7 +14,6 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
   ActiveSupport::TestCase.fixtures :all
 end
 
-require 'pry'
 require 'securerandom'
 require 'stringio'
 require 'paul_bunyan'

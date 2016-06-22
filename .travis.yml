@@ -1,6 +1,7 @@
 bundler_args: ''
 language: ruby
 gemfile:
+  - Gemfile
   - spec/gemfiles/40.gemfile
   - spec/gemfiles/41.gemfile
   - spec/gemfiles/42.gemfile
