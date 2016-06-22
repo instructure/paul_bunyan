@@ -32,6 +32,15 @@ module PaulBunyan
     attr_accessor :default_formatter_type
     PaulBunyan.default_formatter_type = :json
 
+    ANSI_REGEX = /(?:\e\[|\u009b)(?:\d{1,3}(?:;\d{0,3})*)?[0-9A-MRcf-npqrsuy]/.freeze
+    def strip_ansi(value)
+      if value.respond_to?(:to_str)
+        value.to_str.gsub(ANSI_REGEX, '')
+      elsif value
+        value.gsub(ANSI_REGEX, '')
+      end
+    end
+
     def logger
       create_logger(STDOUT) unless @logger
       @logger

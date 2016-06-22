@@ -80,7 +80,7 @@ module PaulBunyan
     end
 
     def format_string(message)
-      { "message" => strip_ansi(message.strip) }
+      { "message" => PaulBunyan.strip_ansi(message.strip) }
     end
 
     def format_generic_object(object)
@@ -108,15 +108,6 @@ module PaulBunyan
         end
         clean
       }
-    end
-
-    ANSI_REGEX = /(?:\e\[|\u009b)(?:\d{1,3}(?:;\d{0,3})*)?[0-9A-MRcf-npqrsuy]/
-    def strip_ansi(value)
-      if value.respond_to?(:to_str)
-        value.to_str.gsub(ANSI_REGEX, '')
-      elsif value
-        value.gsub(ANSI_REGEX, '')
-      end
     end
   end
 end

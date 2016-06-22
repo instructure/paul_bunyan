@@ -134,4 +134,10 @@ describe PaulBunyan do
       PaulBunyan.remove_logger(PaulBunyan.logger.primary_logger)
     end
   end
+
+  describe '::strip_ansi' do
+    it 'removes ANSI color codes' do
+      expect(PaulBunyan.strip_ansi("\e[36;46mcolored message!")).to eq 'colored message!'
+    end
+  end
 end
