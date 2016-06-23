@@ -95,6 +95,19 @@ module PaulBunyan
       logger.nil? ? DEBUG : logger.level
     end
 
+    def silence(level = Logger::ERROR, &block)
+      loggers = self.loggers.select { |l| l.respond_to?(:silence) }.reverse
+      silencer = proc do
+        logger = loggers.pop
+        if logger
+          logger.silence(level, &silencer)
+        else
+          block.call
+        end
+      end
+      silencer.call
+    end
+
     module TaggedRelayer
       def current_tags
         tags = loggers.each_with_object(Set.new) do |logger, set|

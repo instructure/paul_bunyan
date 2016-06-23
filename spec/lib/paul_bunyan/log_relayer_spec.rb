@@ -330,4 +330,20 @@ describe PaulBunyan::LogRelayer do
       end
     end
   end
+
+  context 'silence' do
+    describe '#silence' do
+      it 'calls silence on all loggers' do
+        expect(primary).to receive(:silence).with(Logger::WARN) { |&b| b.call }
+        expect(secondary).to receive(:silence).with(Logger::WARN) { |&b| b.call }
+        expect { |b| double_relayer.silence(Logger::WARN, &b) }.to yield_control
+      end
+
+      it 'skips loggers without a #silence method' do
+        allow(secondary).to receive(:respond_to?) { false }
+        expect(primary).to receive(:silence).with(Logger::WARN) { |&b| b.call }
+        expect { |b| double_relayer.silence(Logger::WARN, &b) }.to yield_control
+      end
+    end
+  end
 end
