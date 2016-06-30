@@ -19,5 +19,6 @@ require 'stringio'
 require 'paul_bunyan'
 
 RSpec.configure do |config|
+  config.color = true
   config.include NotificationHelpers
 end

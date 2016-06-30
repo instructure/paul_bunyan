@@ -30,6 +30,7 @@ module PaulBunyan
       new_logger = PaulBunyan.add_logger(ActiveSupport::Logger.new(log_target(app.config)))
       new_logger.level = PaulBunyan::Level.coerce_level(ENV['LOG_LEVEL'] || ::Rails.application.config.log_level || 'INFO')
       new_logger.formatter = logging_config.formatter
+      new_logger.extend(ActiveSupport::TaggedLogging) if logging_config.formatter.respond_to?(:tagged)
 
       if logging_config.handle_request_logging
         unsubscribe_default_log_subscribers

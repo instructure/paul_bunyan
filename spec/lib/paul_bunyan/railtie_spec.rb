@@ -2,6 +2,15 @@ require 'spec_helper'
 
 module PaulBunyan
   RSpec.describe Railtie do
+    describe 'initializer "initialize_logger.logging"' do
+      it 'must extend the logger with ActiveSupport::TaggedLogging' do
+        # Since we're extending an instance of a class it's hard to actually
+        # check for the module in the ancestry chain. respond_to? should be a
+        # good enough proxy for it though.
+        expect(PaulBunyan.logger.primary_logger).to respond_to(:tagged)
+      end
+    end
+
     describe '#unsubscribe_default_log_subscribers' do
       before do
         @action_controller_subscriber = ActiveSupport::LogSubscriber.subscribers.find{|s|
