@@ -27,4 +27,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rails'
   spec.add_development_dependency 'sqlite3'
   spec.add_development_dependency 'byebug'
+
+  if RUBY_VERSION < '2.2'
+    spec.add_development_dependency 'rack', '< 2.0'
+  end
 end
