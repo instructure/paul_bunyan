@@ -63,18 +63,6 @@ module PaulBunyan
           expect(object['message']).to eq 'This is my message, there are many like it.'
         end
 
-        it 'must remove leading whitespace' do
-          output = formatter.call('', time, '', '   this message has leading spaces')
-          object = JSON.parse(output)
-          expect(object['message']).to eq 'this message has leading spaces'
-        end
-
-        it 'must remove trailing whitespace' do
-          output = formatter.call('', time, '', 'this message has trailing spaces    ')
-          object = JSON.parse(output)
-          expect(object['message']).to eq 'this message has trailing spaces'
-        end
-
         it 'must remove ANSI color codes' do
           output = formatter.call('', time, '', "\e[36;46mcolored message!")
           object = JSON.parse(output)

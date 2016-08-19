@@ -80,7 +80,7 @@ module PaulBunyan
     end
 
     def format_string(message)
-      { "message" => PaulBunyan.strip_ansi(message.strip) }
+      { "message" => PaulBunyan.strip_ansi(message) }
     end
 
     def format_generic_object(object)
