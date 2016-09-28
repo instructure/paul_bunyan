@@ -92,8 +92,19 @@ module PaulBunyan
 
       context "when supplied an exception object" do
         let(:exception) {
-          begin raise StandardError, "This is my exception...."
-          rescue; exception = $!; end
+          begin
+            begin
+              begin
+                raise 'Inner-most exception'
+              rescue
+                raise 'Inner exception'
+              end
+            rescue
+              raise StandardError, 'This is my exception....'
+            end
+          rescue
+            exception = $!
+          end
           exception
         }
         let(:output) { formatter.call('', time, '', exception) }
@@ -109,6 +120,22 @@ module PaulBunyan
 
         it "must include the exception's backtrace" do
           expect(parsed_output['exception.backtrace']).to eq exception.backtrace
+        end
+
+        it "must include the exception's cause" do
+          expect(parsed_output['exception.cause']).to include(
+            'exception.class' => 'RuntimeError',
+            'exception.message' => 'Inner exception',
+            'exception.backtrace' => exception.cause.backtrace
+          )
+        end
+
+        it "must include the exception's cause's cause" do
+          expect(parsed_output['exception.cause']['exception.cause']).to include(
+            'exception.class' => 'RuntimeError',
+            'exception.message' => 'Inner-most exception',
+            'exception.backtrace' => exception.cause.cause.backtrace
+          )
         end
       end
     end
