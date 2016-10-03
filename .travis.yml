@@ -1,12 +1,21 @@
-bundler_args: ''
 language: ruby
+sudo: false
+cache: bundler
+before_script:
+  - bundle update
+rvm:
+  - ruby-head
+  - 2.3.1
+  - 2.2.5
+matrix:
+  fast_finish: true
+  allow_failures:
+    - rvm: ruby-head
 gemfile:
   - Gemfile
   - spec/gemfiles/40.gemfile
   - spec/gemfiles/41.gemfile
   - spec/gemfiles/42.gemfile
-matrix:
-  exclude:
 script: bundle exec rspec
 notifications:
   email:
