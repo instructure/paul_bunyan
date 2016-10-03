@@ -1,5 +1,6 @@
-[![Build Status](https://secure.travis-ci.org/instructure/paul_bunyan.png)](http://travis-ci.org/instructure/paul_bunyan)
 # Paul Bunyan (formerly: Logging)
+
+[![Build Status](https://secure.travis-ci.org/instructure/paul_bunyan.png)](http://travis-ci.org/instructure/paul_bunyan)
 
 PaulBunyan is a re-usable component with a globally accessible Logger with extra
 support for handling logging in Rails.
