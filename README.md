@@ -1,6 +1,7 @@
 # Paul Bunyan (formerly: Logging)
 
 [![Gem](https://badge.fury.io/rb/paul_bunyan.svg)](https://rubygems.org/gems/paul_bunyan)
+[![Build Status](https://secure.travis-ci.org/instructure/paul_bunyan.png)](http://travis-ci.org/instructure/paul_bunyan)
 
 PaulBunyan is a re-usable component with a globally accessible Logger with extra
 support for handling logging in Rails.
