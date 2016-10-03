@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/paul_bunyan.svg)](https://rubygems.org/gems/paul_bunyan)
+
 # Paul Bunyan (formerly: Logging)
 
 PaulBunyan is a re-usable component with a globally accessible Logger with extra
