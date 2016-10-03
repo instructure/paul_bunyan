@@ -8,3 +8,7 @@ gemfile:
 matrix:
   exclude:
 script: bundle exec rspec
+notifications:
+  email:
+    on_success: never
+    on_failure: never
