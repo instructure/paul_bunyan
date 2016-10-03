@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/paul_bunyan.svg)](https://rubygems.org/gems/paul_bunyan)
+
 # Paul Bunyan (formerly: Logging)
 
 [![Build Status](https://secure.travis-ci.org/instructure/paul_bunyan.png)](http://travis-ci.org/instructure/paul_bunyan)
