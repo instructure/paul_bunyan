@@ -71,6 +71,23 @@ RSpec.describe ActionController::Base do
         expect(payload).to include ip: '127.0.0.1'
       end
     end
+
+    context 'with sensitive info in the query params' do
+      before do
+        subject.request = ActionDispatch::TestRequest.new({
+          'action_dispatch.parameter_filter' => [:password, :baz],
+          'PATH_INFO' => '/somewhere',
+          'QUERY_STRING' => 'password=foo&bar=baz&baz=qux',
+        })
+      end
+
+      it 'filters the sensitive params' do
+        calling_index do |*args|
+          payload = args.last
+          expect(payload).to include path: '/somewhere?password=[FILTERED]&bar=baz&baz=[FILTERED]'
+        end
+      end
+    end
   end
 
   def calling_index(&block)

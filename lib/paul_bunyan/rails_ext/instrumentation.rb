@@ -27,7 +27,7 @@ module ActionController
         params: request.filtered_parameters,
         format: request.format.try(:ref),
         method: request.request_method,
-        path: (request.fullpath rescue 'unknown'),
+        path: (request.filtered_path rescue 'unknown'),
       }
     end
 
