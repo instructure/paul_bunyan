@@ -1,0 +1,5 @@
+test:
+  build: .
+  volumes:
+    - .:/usr/src/app
+    - /home/docker/.rvm/gems/

@@ -1,4 +1,4 @@
 test:
   build: .
   volumes:
-    - "coverage:/app/coverage"
+    - "coverage:/usr/src/app/coverage"

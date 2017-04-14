@@ -23,3 +23,4 @@ spec/dummy/log/*.log
 spec/dummy/tmp/
 spec/dummy/.sass-cache
 spec/gemfiles/*.lock
+docker-compose.override.yml

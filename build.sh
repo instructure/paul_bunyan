@@ -2,5 +2,5 @@
 
 set -e
 
-docker-compose build --pull
+docker-compose build --pull test
 docker-compose run test
