@@ -4,7 +4,7 @@ initial_default_formatter_type = PaulBunyan.default_formatter_type
 
 describe PaulBunyan do
   shared_examples 'respecting the ::default_formatter_type' do
-    let(:logger) { double('logger') }
+    let(:logger) { double('logger', formatter: nil) }
 
     before do
       allow(Logger).to receive(:new).and_return(logger)
@@ -69,7 +69,7 @@ describe PaulBunyan do
 
   describe '::create_logger' do
     let(:device) { double('device') }
-    let(:logger) { double('logger') }
+    let(:logger) { double('logger', formatter: nil) }
 
     before do
       allow(logger).to receive(:formatter=)
@@ -90,6 +90,23 @@ describe PaulBunyan do
       expect(Logger).to receive(:new).and_return(logger)
       expect(logger).to receive(:formatter=).with(instance_of(PaulBunyan::TextFormatter))
       PaulBunyan.create_logger(device, formatter_type: :text)
+    end
+
+    it 'creates a logger capable of tagging when using formatter that is capable of tagging' do
+      allow(logger).to receive(:formatter).and_return(double('formatter', tagged:nil))
+      allow(Logger).to receive(:new).and_return(logger)
+      PaulBunyan.create_logger(device)
+
+      expect(logger.formatter).to respond_to(:tagged)
+      expect(logger).to be_kind_of(PaulBunyan::TaggedLogging)
+    end
+
+    it 'creates a regular logger when using formatter that is not capable of tagging' do
+      allow(Logger).to receive(:new).and_return(logger)
+      PaulBunyan.create_logger(device)
+
+      expect(logger.formatter).to_not respond_to(:tagged)
+      expect(logger).to_not be_kind_of(PaulBunyan::TaggedLogging)
     end
 
     def default_formatter_type_call

@@ -5,6 +5,7 @@ require_relative 'paul_bunyan/level'
 require_relative 'paul_bunyan/log_relayer'
 require_relative 'paul_bunyan/text_formatter'
 require_relative 'paul_bunyan/version'
+require_relative 'paul_bunyan/tagged_logging'
 
 require_relative 'paul_bunyan/railtie' if defined? ::Rails::Railtie
 
@@ -49,6 +50,7 @@ module PaulBunyan
     def create_logger(logdev, shift_age = 0, shift_size = 1048576, formatter_type: PaulBunyan.default_formatter_type)
       logger = Logger.new(logdev, shift_age, shift_size)
       logger.formatter = default_formatter(formatter_type) unless formatter_type.nil?
+      logger.extend(TaggedLogging) if logger.formatter.respond_to?(:tagged)
       add_logger(logger)
     end
 
