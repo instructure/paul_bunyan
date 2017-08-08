@@ -16,4 +16,4 @@ COPY . /usr/src/app
 USER root
 RUN chown -R docker:docker /usr/src/app/*
 USER docker
-CMD /bin/bash -l -c "bundle exec wwtd --parallel"
+CMD /bin/bash -l -c "wwtd --parallel"
