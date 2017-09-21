@@ -18,7 +18,7 @@ RSpec.describe ActionController::Base do
   end
 
   before :each do
-    subject.request = ActionDispatch::TestRequest.new({
+    subject.request = build_request({
       'action_dispatch.request_id' => request_id,
       'REMOTE_ADDR' => '127.0.0.1',
     })
@@ -74,7 +74,7 @@ RSpec.describe ActionController::Base do
 
     context 'with sensitive info in the query params' do
       before do
-        subject.request = ActionDispatch::TestRequest.new({
+        subject.request = build_request({
           'action_dispatch.parameter_filter' => [:password, :baz],
           'PATH_INFO' => '/somewhere',
           'QUERY_STRING' => 'password=foo&bar=baz&baz=qux',
@@ -88,6 +88,11 @@ RSpec.describe ActionController::Base do
         end
       end
     end
+  end
+
+  def build_request(attrs)
+    factory_method = (Rails.version >= '5.0' ? :create : :new)
+    ActionDispatch::TestRequest.send(factory_method, attrs)
   end
 
   def calling_index(&block)

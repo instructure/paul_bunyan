@@ -2,7 +2,7 @@ FROM instructure/rvm
 MAINTAINER Instructure
 
 WORKDIR /usr/src/app
-RUN /bin/bash -l -c "rvm use --default 2.3"
+RUN /bin/bash -l -c "rvm use --default 2.4"
 
 COPY paul_bunyan.gemspec Gemfile /usr/src/app/
 COPY lib/paul_bunyan/version.rb /usr/src/app/lib/paul_bunyan/

@@ -1,4 +1,9 @@
-test:
-  build: .
-  volumes:
-    - "coverage:/usr/src/app/coverage"
+version: '2.0'
+services:
+  test:
+    build: .
+    volumes:
+      - "coverage:/usr/src/app/coverage"
+
+volumes:
+  coverage: {}
