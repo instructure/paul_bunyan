@@ -31,6 +31,7 @@ module PaulBunyan
       new_logger.level = PaulBunyan::Level.coerce_level(ENV['LOG_LEVEL'] || ::Rails.application.config.log_level || 'INFO')
       new_logger.formatter = logging_config.formatter
       new_logger.extend(ActiveSupport::TaggedLogging) if logging_config.formatter.respond_to?(:tagged)
+      new_logger.extend(PaulBunyan::MetadataLogging) if logging_config.formatter.respond_to?(:with_metadata)
 
       if logging_config.handle_request_logging
         unsubscribe_default_log_subscribers

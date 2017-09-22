@@ -1,10 +1,6 @@
-require 'set'
 require 'spec_helper'
-require 'stringio'
 
 describe PaulBunyan::LogRelayer do
-  let(:device) { StringIO.new }
-
   let(:empty_relayer) { PaulBunyan::LogRelayer.new }
 
   let(:primary) { double('primary logger') }
@@ -32,10 +28,6 @@ describe PaulBunyan::LogRelayer do
     it 'with no parameters, creates an empty log relayer' do
       expect(empty_relayer.loggers).to be_empty
     end
-  end
-
-  describe '#loggers' do
-    # tested by specs for #primary_logger and #secondary_loggers
   end
 
   describe '#primary_logger' do
@@ -66,7 +58,7 @@ describe PaulBunyan::LogRelayer do
   describe '#add_logger' do
     it 'adds loggers to the end of the #loggers array' do
       empty_relayer.add_logger(primary)
-      expect(empty_relayer.loggers.last).to be(primary)
+      expect(empty_relayer.loggers).to contain_exactly(primary)
     end
 
     it 'sets #primary_logger when the first logger is added' do
@@ -256,81 +248,6 @@ describe PaulBunyan::LogRelayer do
     end
   end
 
-  context 'tagging' do
-    describe '#current_tags' do
-      it 'aggregates the #current_tags of child loggers (skipping non-tagged loggers)' do
-        expect(primary).to receive(:current_tags).and_return(%w(a b))
-        expect(tertiary).to receive(:current_tags).and_return(%w(b c))
-        expect(Set.new(triple_relayer.current_tags)).to be_superset(Set.new(%w(a b c)))
-      end
-    end
-
-    describe '#push_tags' do
-      it 'delegates to all child loggers' do
-        expect(primary).to receive(:push_tags).with(*%w(a b c))
-        expect(tertiary).to receive(:push_tags).with(*%w(a b c))
-        triple_relayer.push_tags(*%w(a b c))
-      end
-
-      it 'flattens the tags list' do
-        expect(primary).to receive(:push_tags).with(*%w(a b c d))
-        single_relayer.push_tags(%w(a b), %w(c d))
-      end
-
-      it 'omits blank tags' do
-        expect(primary).to receive(:push_tags).with(*%w(a b c d))
-        single_relayer.push_tags(['a', 'b', '', nil, 'c', 'd'])
-      end
-
-      it 'returns the flattened, non-blank list of tags' do
-        allow(primary).to receive(:push_tags)
-        expect(single_relayer.push_tags(%w(a b), nil, '', %w(c d))).to eq(%w(a b c d))
-      end
-    end
-
-    describe '#pop_tags' do
-      it 'delegates to all child loggers' do
-        expect(primary).to receive(:pop_tags).with(4)
-        expect(tertiary).to receive(:pop_tags).with(4)
-        triple_relayer.pop_tags(4)
-      end
-    end
-
-    describe '#clear_tags!' do
-      it 'delegates to all child loggers' do
-        expect(primary).to receive(:clear_tags!)
-        expect(secondary).to receive(:clear_tags!)
-        triple_relayer.clear_tags!
-      end
-    end
-
-    describe '#flush' do
-      it 'delegates to all child loggers' do
-        expect(primary).to receive(:flush)
-        expect(secondary).to receive(:flush)
-        triple_relayer.flush
-      end
-    end
-
-    describe '#tagged' do
-      it 'calls #push_tags with the given tags' do
-        expect(single_relayer).to receive(:push_tags).with(*%w(a b c)).and_return(%w(a b c))
-        expect { |b| single_relayer.tagged(*%w(a b c), &b) }.to yield_control
-      end
-
-      it 'calls #pop_tags with the number of tags returned from #push_tags' do
-        expect(single_relayer).to receive(:push_tags).with('a', 'b', '', 'd').and_return(%w(a b c))
-        expect(single_relayer).to receive(:pop_tags).with(3)
-        single_relayer.tagged('a', 'b', '', 'd') {}
-      end
-
-      it 'calls #pop_tags when the block raises an exception' do
-        expect(single_relayer).to receive(:pop_tags)
-        expect { single_relayer.tagged('a') { fail StandardError, ':(' } }.to raise_error(StandardError)
-      end
-    end
-  end
-
   context 'silence' do
     describe '#silence' do
       it 'calls silence on all loggers' do
@@ -343,6 +260,148 @@ describe PaulBunyan::LogRelayer do
         allow(secondary).to receive(:respond_to?) { false }
         expect(primary).to receive(:silence).with(Logger::WARN) { |&b| b.call }
         expect { |b| double_relayer.silence(Logger::WARN, &b) }.to yield_control
+      end
+    end
+  end
+
+  describe '#current_tags' do
+    it 'aggregates the #current_tags of child loggers (skipping non-tagged loggers)' do
+      expect(primary).to receive(:current_tags).and_return(%w(a b))
+      expect(tertiary).to receive(:current_tags).and_return(%w(b c))
+      expect(Set.new(triple_relayer.current_tags)).to be_superset(Set.new(%w(a b c)))
+    end
+  end
+
+  describe '#push_tags' do
+    it 'delegates to all child loggers' do
+      expect(primary).to receive(:push_tags).with(*%w(a b c))
+      expect(tertiary).to receive(:push_tags).with(*%w(a b c))
+      triple_relayer.push_tags(*%w(a b c))
+    end
+
+    it 'flattens the tags list' do
+      expect(primary).to receive(:push_tags).with(*%w(a b c d))
+      single_relayer.push_tags(%w(a b), %w(c d))
+    end
+
+    it 'omits blank tags' do
+      expect(primary).to receive(:push_tags).with(*%w(a b c d))
+      single_relayer.push_tags(['a', 'b', '', nil, 'c', 'd'])
+    end
+
+    it 'returns the flattened, non-blank list of tags' do
+      allow(primary).to receive(:push_tags)
+      expect(single_relayer.push_tags(%w(a b), nil, '', %w(c d))).to eq(%w(a b c d))
+    end
+  end
+
+  describe '#pop_tags' do
+    it 'delegates to all child loggers' do
+      expect(primary).to receive(:pop_tags).with(4)
+      expect(tertiary).to receive(:pop_tags).with(4)
+      triple_relayer.pop_tags(4)
+    end
+  end
+
+  describe '#clear_tags!' do
+    it 'delegates to all child loggers' do
+      expect(primary).to receive(:clear_tags!)
+      expect(secondary).to receive(:clear_tags!)
+      triple_relayer.clear_tags!
+    end
+  end
+
+  describe '#flush' do
+    it 'delegates to all child loggers' do
+      expect(primary).to receive(:flush)
+      expect(secondary).to receive(:flush)
+      triple_relayer.flush
+    end
+  end
+
+  describe '#tagged' do
+    it 'calls #push_tags with the given tags' do
+      expect(single_relayer).to receive(:push_tags).with(*%w(a b c)).and_return(%w(a b c))
+      expect { |b| single_relayer.tagged(*%w(a b c), &b) }.to yield_control
+    end
+
+    it 'calls #pop_tags with the number of tags returned from #push_tags' do
+      expect(single_relayer).to receive(:push_tags).with('a', 'b', '', 'd').and_return(%w(a b c))
+      expect(single_relayer).to receive(:pop_tags).with(3)
+      single_relayer.tagged('a', 'b', '', 'd') {}
+    end
+
+    it 'calls #pop_tags when the block raises an exception' do
+      expect(single_relayer).to receive(:pop_tags)
+      expect { single_relayer.tagged('a') { fail StandardError, ':(' } }.to raise_error(StandardError)
+    end
+  end
+
+  context 'logging metadata' do
+    let(:my_metadata) { {foo: 'bar'} }
+
+    before do
+      allow(primary).to receive(:respond_to?).and_return(true)
+      allow(secondary).to receive(:respond_to?).and_return(false)
+      allow(tertiary).to receive(:respond_to?).and_return(true)
+    end
+
+    describe '#add_metadata' do
+      it 'delegates to all child loggers that support it' do
+        expect(primary).to receive(:add_metadata).with(my_metadata)
+        expect(secondary).to_not receive(:add_metadata)
+        double_relayer.add_metadata(my_metadata)
+      end
+    end
+
+    describe '#clear_metadata!' do
+      it 'delegates to all child loggers' do
+        expect(primary).to receive(:clear_metadata!)
+        expect(secondary).to_not receive(:clear_metadata!)
+        double_relayer.clear_metadata!
+      end
+    end
+
+    describe '#current_metadata' do
+      it 'aggregates the #current_metadata of child loggers (skipping non-metadata loggers)' do
+        expect(primary).to receive(:current_metadata).and_return(foo: 'bar')
+        expect(secondary).to_not receive(:current_metadata)
+        expect(tertiary).to receive(:current_metadata).and_return(baz: 'qux')
+
+        expect(triple_relayer.current_metadata).to eq(foo: 'bar', baz: 'qux')
+      end
+    end
+
+    describe '#remove_metadata' do
+      it 'delegates to all child loggers' do
+        expect(primary).to receive(:remove_metadata).with(my_metadata)
+        expect(secondary).to_not receive(:remove_metadata)
+        double_relayer.remove_metadata(my_metadata)
+      end
+    end
+
+    describe '#with_metadata' do
+      before do
+        allow(single_relayer).to receive(:add_metadata).with(my_metadata)
+        allow(single_relayer).to receive(:remove_metadata).with(my_metadata)
+      end
+
+      it 'must call #add_metadata with the supplied hash' do
+        expect(single_relayer).to receive(:add_metadata).with(my_metadata)
+        expect { |b| single_relayer.with_metadata(my_metadata, &b) }.to yield_control
+      end
+
+      it 'must call #remove_metadata with the supplied hash' do
+        expect(single_relayer).to receive(:remove_metadata).with(my_metadata)
+        expect { |b| single_relayer.with_metadata(my_metadata, &b) }.to yield_control
+      end
+
+      it 'must call #remove_metadata when the block raises an exception' do
+        expect(single_relayer).to receive(:remove_metadata).with(my_metadata)
+        expect { single_relayer.with_metadata(my_metadata) do
+          fail StandardError, ':('
+        end
+        }.to raise_error(StandardError)
       end
     end
   end

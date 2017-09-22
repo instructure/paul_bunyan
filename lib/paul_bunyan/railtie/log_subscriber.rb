@@ -71,15 +71,6 @@ module PaulBunyan
       end
     end
 
-    if Rails.version.start_with?('4.0')
-      attr_reader :patterns
-
-      def initialize
-        super
-        @patterns ||= []
-      end
-    end
-
     # Handle the start_processing event in the action_controller namespace
     #
     # We're only registering for this event so the default

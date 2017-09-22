@@ -19,8 +19,8 @@ end
 
 Also included is a Railtie that overrides the default rails logger to always
 print to STDOUT as well as format the messages to JSON for machine readable
-goodness. This has been tested with Rails 4.2 but should compatible with
-Rails 3 or newer since that's when Railties were introduced.
+goodness. This has been tested with Rails 4.2 through 5.1, older versions of
+Rails may work but are not guaranteed to and will not receive support.
 
 ## Installation
 
@@ -53,3 +53,12 @@ logger.warn "blah"
 ### Rails projects:
 
 Nothing after it's added to your Gemfile, the Railtie takes care of the rest.
+
+### Adding metadata to JSON logs
+The default logger includes the ability to accept arbitrary metadata, the
+primary use case for this functionality is to add context to log lines generated
+in the course of processing a Rails request. There is an example for adding
+the request host to the metadata in the examples directory. There are a few
+keys that are used internally that will be overwritten when added to user
+supplied metadata, this list can be found in the `#call` method of
+`PaulBunyan::JSONFormatter`.

@@ -108,43 +108,66 @@ module PaulBunyan
       silencer.call
     end
 
-    module TaggedRelayer
-      def current_tags
-        tags = loggers.each_with_object(Set.new) do |logger, set|
-          set.merge(logger.current_tags) if logger.respond_to?(:current_tags)
-        end
-        tags.to_a
+    def current_tags
+      tags = loggers.each_with_object(Set.new) do |logger, set|
+        set.merge(logger.current_tags) if logger.respond_to?(:current_tags)
       end
+      tags.to_a
+    end
 
-      def push_tags(*tags)
-        tags.flatten.reject(&:blank?).tap do |new_tags|
-          loggers.each { |logger| logger.push_tags(*new_tags) if logger.respond_to?(:push_tags) }
-        end
-      end
-
-      def pop_tags(size = 1)
-        loggers.each { |logger| logger.pop_tags(size) if logger.respond_to?(:pop_tags) }
-        nil
-      end
-
-      def clear_tags!
-        loggers.each { |logger| logger.clear_tags! if logger.respond_to?(:clear_tags!) }
-        nil
-      end
-
-      def flush
-        loggers.each { |logger| logger.flush if logger.respond_to?(:flush) }
-        nil
-      end
-
-      def tagged(*tags)
-        new_tags = push_tags(*tags)
-        yield self
-      ensure
-        pop_tags(new_tags.size)
+    def push_tags(*tags)
+      tags.flatten.reject(&:blank?).tap do |new_tags|
+        messaging_loggers(:push_tags, *new_tags)
       end
     end
-    include TaggedRelayer
+
+    def pop_tags(size = 1)
+      messaging_loggers(:pop_tags, size)
+    end
+
+    def clear_tags!
+      messaging_loggers(:clear_tags!)
+    end
+
+    def flush
+      messaging_loggers(:flush)
+    end
+
+    def tagged(*tags)
+      new_tags = push_tags(*tags)
+      yield self
+    ensure
+      pop_tags(new_tags.size)
+    end
+
+    def add_metadata(metadata)
+      messaging_loggers(:add_metadata, metadata)
+    end
+
+    def clear_metadata!
+      messaging_loggers(:clear_metadata!)
+    end
+
+    def current_metadata
+      loggers.inject({}) do |agg, logger|
+        if logger.respond_to?(:current_metadata)
+          agg.merge(logger.current_metadata)
+        else
+          agg
+        end
+      end
+    end
+
+    def remove_metadata(metadata)
+      messaging_loggers(:remove_metadata, metadata)
+    end
+
+    def with_metadata(metadata)
+      add_metadata(metadata)
+      yield
+    ensure
+      remove_metadata(metadata)
+    end
 
     private
 
@@ -156,6 +179,11 @@ module PaulBunyan
         called = true
         result = block.call
       end
+    end
+
+    def messaging_loggers(required_method, *args)
+      loggers.each { |l| l.public_send(required_method, *args) if l.respond_to?(required_method) }
+      nil
     end
   end
 end

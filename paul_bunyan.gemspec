@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['duane@instructure.com', 'kromney@instructure.com', 'markse@instructure.com', 'tpickett@instructure.com']
   spec.summary       = 'Logging for all the things'
   spec.description   = "Extensions and enhancements to Ruby's built in Logger class. Extensions include: multiple output streams, JSON formatting for easy aggregation, and a Railtie to set some sane(ish) defaults for production Rails environments."
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/instructure/paul_bunyan'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -27,8 +27,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rails', '>= 4.2'
   spec.add_development_dependency 'sqlite3'
   spec.add_development_dependency 'byebug'
-
-  if RUBY_VERSION < '2.2'
-    spec.add_development_dependency 'rack', '< 2.0'
-  end
 end

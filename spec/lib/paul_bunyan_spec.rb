@@ -101,6 +101,15 @@ describe PaulBunyan do
       expect(logger).to be_kind_of(PaulBunyan::TaggedLogging)
     end
 
+    it 'must create a logger capable of handling metadata when using a formatter capable of handling metadata' do
+      allow(logger).to receive(:formatter).and_return(double('formatter', with_metadata:nil))
+      allow(Logger).to receive(:new).and_return(logger)
+      PaulBunyan.create_logger(device)
+
+      expect(logger.formatter).to respond_to(:with_metadata)
+      expect(logger).to be_kind_of(PaulBunyan::MetadataLogging)
+    end
+
     it 'creates a regular logger when using formatter that is not capable of tagging' do
       allow(Logger).to receive(:new).and_return(logger)
       PaulBunyan.create_logger(device)
@@ -146,6 +155,11 @@ describe PaulBunyan do
   end
 
   describe '::remove_logger' do
+    it 'must not blow up when the logger has not been set' do
+      PaulBunyan.instance_variable_set(:@logger, nil)
+      PaulBunyan.remove_logger('nxlogger')
+    end
+
     it 'removes the logger from the log relayer' do
       expect(PaulBunyan.logger).to receive(:remove_logger).with(PaulBunyan.logger.primary_logger)
       PaulBunyan.remove_logger(PaulBunyan.logger.primary_logger)

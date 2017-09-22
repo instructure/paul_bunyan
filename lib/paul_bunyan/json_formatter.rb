@@ -5,13 +5,17 @@ module PaulBunyan
   class JSONFormatter
     DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%3N'
 
+    def add_metadata(metadata)
+      current_metadata.merge!(metadata)
+    end
+
     def call(severity, time, progname, msg)
-      metadata = {
+      metadata = current_metadata.merge({
         "ts"       => time.utc.strftime(DATETIME_FORMAT),
         "unix_ts"  => time.to_f,
         "severity" => severity,
         "pid"      => $$,
-      }
+      })
       metadata['program'] = progname if progname
       metadata['tags'] = current_tags unless current_tags.empty?
 
@@ -20,13 +24,24 @@ module PaulBunyan
       JSON::generate(merge_metadata_and_message(metadata, message_data)) + "\n"
     end
 
+    def clear_metadata!
+      current_metadata.clear
+    end
+
     def clear_tags!
       current_tags.clear
     end
 
+    def current_metadata
+      metadata_thread_key = @metadata_thread_key ||=
+        "paul_bunyan_logging_metadata:#{self.object_id}"
+      Thread.current[metadata_thread_key] ||= {}
+    end
+
     def current_tags
-      thread_key = @thread_key ||= "logging_tagged_logging_tags:#{ Thread.current.object_id }"
-      Thread.current[thread_key] ||= []
+      tags_thread_key = @tags_thread_key ||=
+        "paul_bunyan_logging_tags:#{self.object_id}"
+      Thread.current[tags_thread_key] ||= []
     end
 
     def datetime_format=(value)
@@ -48,11 +63,22 @@ module PaulBunyan
       end
     end
 
+    def remove_metadata(metadata)
+      metadata.each { |k, _| current_metadata.delete(k) }
+    end
+
     def tagged(*tags)
       clean_tags = push_tags(tags)
       yield
     ensure
       pop_tags(clean_tags.size)
+    end
+
+    def with_metadata(consumer_metadata)
+      add_metadata(consumer_metadata)
+      yield
+    ensure
+      remove_metadata(consumer_metadata)
     end
 
     private

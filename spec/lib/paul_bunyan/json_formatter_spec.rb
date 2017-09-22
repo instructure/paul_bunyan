@@ -56,6 +56,14 @@ module PaulBunyan
         end
       end
 
+      it 'must merge supplied metadata into the message' do
+        formatter.with_metadata(foo: 'bar') do
+          output = formatter.call('', time, '', 'This is my message, there are many like it.')
+          object = JSON.parse(output)
+          expect(object).to include 'foo' => 'bar'
+        end
+      end
+
       context 'when supplied a string as the message' do
         it 'must wrap the message in an object with a message key containing the key' do
           output = formatter.call('', time, '', 'This is my message, there are many like it.')
