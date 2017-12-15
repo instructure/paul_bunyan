@@ -17,6 +17,16 @@ module PaulBunyan
       Rails.env.development? || Rails.env.test?
     end
 
+    def self.rake_task?
+      File.basename($0) == 'rake'
+    end
+
+    def self.migrating?
+      rake_task? && ARGV.include?('db:migrate')
+    end
+
+    delegate :rake_task?, :migrating?, to: :class
+
     # Set up the config and some defaults
     config.logging = ActiveSupport::OrderedOptions.new
     config.logging.override_location = !Rails.env.test?
@@ -27,18 +37,20 @@ module PaulBunyan
     initializer 'initalize_logger.logging', group: :all, before: :initialize_logger do |app|
       logging_config = config.logging
 
-      new_logger = PaulBunyan.add_logger(ActiveSupport::Logger.new(log_target(app.config)))
-      new_logger.level = PaulBunyan::Level.coerce_level(ENV['LOG_LEVEL'] || ::Rails.application.config.log_level || 'INFO')
-      new_logger.formatter = logging_config.formatter
-      new_logger.extend(ActiveSupport::TaggedLogging) if logging_config.formatter.respond_to?(:tagged)
-      new_logger.extend(PaulBunyan::MetadataLogging) if logging_config.formatter.respond_to?(:with_metadata)
+      unless migrating?
+        new_logger = PaulBunyan.add_logger(ActiveSupport::Logger.new(log_target(app.config)))
+        new_logger.level = PaulBunyan::Level.coerce_level(ENV['LOG_LEVEL'] || ::Rails.application.config.log_level || 'INFO')
+        new_logger.formatter = logging_config.formatter
+        new_logger.extend(ActiveSupport::TaggedLogging) if logging_config.formatter.respond_to?(:tagged)
+        new_logger.extend(PaulBunyan::MetadataLogging) if logging_config.formatter.respond_to?(:with_metadata)
 
-      if logging_config.handle_request_logging
-        unsubscribe_default_log_subscribers
-        LogSubscriber.subscribe_to_events
+        if logging_config.handle_request_logging
+          unsubscribe_default_log_subscribers
+          LogSubscriber.subscribe_to_events
+        end
+
+        Rails.logger = PaulBunyan.logger
       end
-
-      Rails.logger = PaulBunyan.logger
     end
 
     console do
