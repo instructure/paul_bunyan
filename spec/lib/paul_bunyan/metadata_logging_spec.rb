@@ -21,6 +21,21 @@ describe PaulBunyan::MetadataLogging do
     end
   end
 
+  it 'must delegate add_metadata to the formatter' do
+    expect(formatter).to receive(:add_metadata).with(foo: 'bar')
+    subject.add_metadata(foo: 'bar')
+  end
+
+  it 'must delegate current_metadata to the formatter' do
+    expect(formatter).to receive(:current_metadata).and_return({})
+    subject.current_metadata
+  end
+
+  it 'must delegate remove_metadata to the formatter' do
+    expect(formatter).to receive(:remove_metadata).with(foo: 'bar')
+    subject.remove_metadata(foo: 'bar')
+  end
+
   context '#flush' do
     it 'clears metadata on the formatter' do
       expect(formatter).to receive(:clear_metadata!)
