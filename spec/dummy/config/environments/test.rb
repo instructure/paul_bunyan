@@ -18,7 +18,6 @@ Dummy::Application.configure do
     config.static_cache_control = 'public, max-age=3600'
   end
 
-
   # Show full error reports and disable caching.
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
@@ -42,4 +41,13 @@ Dummy::Application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  # Simulate default production logging configuration
+  if Rails.version < '5.1'
+    config.log_formatter = ::Logger::Formatter.new
+  else
+    logger           = ActiveSupport::Logger.new(STDOUT)
+    logger.formatter = config.log_formatter
+    config.logger    = ActiveSupport::TaggedLogging.new(logger)
+  end
 end

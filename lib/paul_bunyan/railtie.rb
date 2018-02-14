@@ -42,7 +42,7 @@ module PaulBunyan
     end
 
     console do
-      PaulBunyan.logger.formatter = TextFormatter.new(include_metadata: false)
+      PaulBunyan.logger.formatter = TextFormatter.new(include_metadata: false) unless ENV['PB_DISABLE_CONSOLE_OVERRIDE']
     end
 
     def conditionally_unsubscribe(listener)

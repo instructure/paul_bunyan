@@ -62,3 +62,7 @@ the request host to the metadata in the examples directory. There are a few
 keys that are used internally that will be overwritten when added to user
 supplied metadata, this list can be found in the `#call` method of
 `PaulBunyan::JSONFormatter`.
+
+### Seeing what your server logs will look like in the console
+To do this set `PB_DISABLE_CONSOLE_OVERRIDE` in your environment:
+`PB_DISABLE_CONSOLE_OVERRIDE=1 bundle exec rails c`
