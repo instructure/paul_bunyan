@@ -43,9 +43,7 @@ Or install it yourself as:
 ```
 require 'paul_bunyan'
 
-include PaulBunyan::Logger
-
-PaulBunyan.set_logger(STDOUT)
+include PaulBunyan
 
 logger.warn "blah"
 ```
