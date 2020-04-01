@@ -66,8 +66,12 @@ module PaulBunyan
       subscribers << subscriber
 
       event_patterns.each do |pattern|
-        subscriber.patterns << pattern
-        notifier.subscribe(pattern, subscriber)
+        if Rails::VERSION::MAJOR >= 6
+          subscriber.patterns[pattern] = notifier.subscribe(pattern, subscriber)
+        else
+          subscriber.patterns << pattern
+          notifier.subscribe(pattern, subscriber)
+        end
       end
     end
 
