@@ -1,12 +1,9 @@
 language: ruby
 rvm:
-  - 2.4
   - 2.5
   - 2.6
+  - 2.7
 matrix:
-  exclude:
-    - rvm: 2.4
-      gemfile: spec/gemfiles/60.gemfile
   fast_finish: true
   # WWTD doesn't support allow_failures... yet
   # allow_failures:
@@ -14,6 +11,7 @@ matrix:
 gemfile:
   - spec/gemfiles/52.gemfile
   - spec/gemfiles/60.gemfile
+  - spec/gemfiles/61.gemfile
 script: bundle exec rspec
 notifications:
   email:

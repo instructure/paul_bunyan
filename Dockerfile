@@ -2,18 +2,14 @@ FROM instructure/rvm
 MAINTAINER Instructure
 
 WORKDIR /usr/src/app
-RUN /bin/bash -l -c "rvm use --default 2.4"
+# Everyone use the same bundler version
+RUN /bin/bash -l -c "rvm use 2.5 && gem install bundler"
+RUN /bin/bash -l -c "rvm use 2.6 && gem install bundler"
+RUN /bin/bash -l -c "rvm use --default 2.7 && gem install bundler"
 
-COPY paul_bunyan.gemspec Gemfile /usr/src/app/
-COPY lib/paul_bunyan/version.rb /usr/src/app/lib/paul_bunyan/
-
-USER root
-RUN chown -R docker:docker /usr/src/app
-USER docker
+COPY --chown=docker:docker paul_bunyan.gemspec Gemfile /usr/src/app/
+COPY --chown=docker:docker lib/paul_bunyan/version.rb /usr/src/app/lib/paul_bunyan/
 RUN /bin/bash -l -c "bundle install"
 
-COPY . /usr/src/app
-USER root
-RUN chown -R docker:docker /usr/src/app/*
-USER docker
+COPY --chown=docker:docker . /usr/src/app
 CMD /bin/bash -l -c "wwtd --parallel"

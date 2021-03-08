@@ -32,10 +32,10 @@ module PaulBunyan
       end
 
       it 'must leave the ActionController::LogSubscriber subscription to deep_munge.action_controller in place' do
-        # I don't expect that we'll ever care to unsubcribe the logger
-        # non-event so we'll use it as a check to ensure we don't
-        # clobber all of the listeners, only the ones we care about
-        expect(subscriber_classes_for('logger.action_controller')).
+        # We do not currently support fragment cache logging so we'll use it as
+        # a check to ensure we don't clobber all of the listeners, only the
+        # ones we care about
+        expect(subscriber_classes_for('write_fragment.action_controller')).
           to include ActionController::LogSubscriber
       end
     end
