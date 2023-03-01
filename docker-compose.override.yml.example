@@ -3,8 +3,8 @@ services:
   test:
     build: .
     volumes:
-      - "./:/usr/src/app"
-      - "gems:/home/docker/.rvm/gems/"
+      - .:/app
+      - bundle:/usr/local/bundle
 
 volumes:
   gems: {}

@@ -1,4 +1,3 @@
-require 'paul_bunyan/rails_ext'
 require 'paul_bunyan/railtie/log_subscriber'
 require 'action_controller/log_subscriber'
 require 'action_view/log_subscriber'

@@ -89,12 +89,14 @@ module PaulBunyan
     # the log line
     #
     # @param event [ActiveSupport::Notifications::Event]
-    ACTION_PAYLOAD_KEYS = [:method, :controller, :action, :format, :path, :request_id, :ip, :status, :view_runtime, :db_runtime]
+    ACTION_PAYLOAD_KEYS = [:method, :controller, :action, :format, :path, :status, :view_runtime, :db_runtime]
     action_controller_event def process_action(event)
       payload = event.payload
       ACTION_PAYLOAD_KEYS.each do |attr|
         aggregator[attr] = payload[attr]
       end
+      aggregator[:ip] = payload[:request].ip
+      aggregator[:request_id] = payload[:request].env['action_dispatch.request_id']
       aggregator.params = payload[:params].except(*INTERNAL_PARAMS)
 
       logger.info { aggregator_without_nils }

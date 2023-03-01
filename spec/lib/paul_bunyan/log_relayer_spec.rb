@@ -337,6 +337,10 @@ describe PaulBunyan::LogRelayer do
     end
   end
 
+  # The funny `, **({})` bit can be removed once we don't test on ruby 2.7
+  # It ensures that the spec considers the arg to be a hash arg and not a kwarg
+  # on ruby < 3.0.  The methods treat actual hashes and kwargs identically so
+  # it doesn't really matter which one it passes through as
   context 'logging metadata' do
     let(:my_metadata) { {foo: 'bar'} }
 
@@ -350,7 +354,7 @@ describe PaulBunyan::LogRelayer do
       it 'delegates to all child loggers that support it' do
         expect(primary).to receive(:add_metadata).with(my_metadata)
         expect(secondary).to_not receive(:add_metadata)
-        double_relayer.add_metadata(my_metadata)
+        double_relayer.add_metadata(my_metadata, **({}))
       end
     end
 
@@ -376,29 +380,29 @@ describe PaulBunyan::LogRelayer do
       it 'delegates to all child loggers' do
         expect(primary).to receive(:remove_metadata).with(my_metadata)
         expect(secondary).to_not receive(:remove_metadata)
-        double_relayer.remove_metadata(my_metadata)
+        double_relayer.remove_metadata(my_metadata, **({}))
       end
     end
 
     describe '#with_metadata' do
       before do
-        allow(single_relayer).to receive(:add_metadata).with(my_metadata)
-        allow(single_relayer).to receive(:remove_metadata).with(my_metadata)
+        allow(single_relayer).to receive(:add_metadata).with(my_metadata, **({}))
+        allow(single_relayer).to receive(:remove_metadata).with(my_metadata, **({}))
       end
 
       it 'must call #add_metadata with the supplied hash' do
-        expect(single_relayer).to receive(:add_metadata).with(my_metadata)
-        expect { |b| single_relayer.with_metadata(my_metadata, &b) }.to yield_control
+        expect(single_relayer).to receive(:add_metadata).with(my_metadata, **({}))
+        expect { |b| single_relayer.with_metadata(my_metadata, **({}), &b) }.to yield_control
       end
 
       it 'must call #remove_metadata with the supplied hash' do
-        expect(single_relayer).to receive(:remove_metadata).with(my_metadata)
-        expect { |b| single_relayer.with_metadata(my_metadata, &b) }.to yield_control
+        expect(single_relayer).to receive(:remove_metadata).with(my_metadata, **({}))
+        expect { |b| single_relayer.with_metadata(my_metadata, **({}), &b) }.to yield_control
       end
 
       it 'must call #remove_metadata when the block raises an exception' do
-        expect(single_relayer).to receive(:remove_metadata).with(my_metadata)
-        expect { single_relayer.with_metadata(my_metadata) do
+        expect(single_relayer).to receive(:remove_metadata).with(my_metadata, **({}))
+        expect { single_relayer.with_metadata(my_metadata, **({})) do
           fail StandardError, ':('
         end
         }.to raise_error(StandardError)

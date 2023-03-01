@@ -1,15 +1,14 @@
-FROM instructure/rvm
-MAINTAINER Instructure
+ARG  RUBY_VERSION=2.7
+FROM ruby:${RUBY_VERSION}
 
-WORKDIR /usr/src/app
-# Everyone use the same bundler version
-RUN /bin/bash -l -c "rvm use 2.5 && gem install bundler"
-RUN /bin/bash -l -c "rvm use 2.6 && gem install bundler"
-RUN /bin/bash -l -c "rvm use --default 2.7 && gem install bundler"
+WORKDIR /app
 
-COPY --chown=docker:docker paul_bunyan.gemspec Gemfile /usr/src/app/
-COPY --chown=docker:docker lib/paul_bunyan/version.rb /usr/src/app/lib/paul_bunyan/
-RUN /bin/bash -l -c "bundle install"
+RUN /bin/bash -lc "gem install bundler -v 2.3.26"
 
-COPY --chown=docker:docker . /usr/src/app
-CMD /bin/bash -l -c "wwtd --parallel"
+ARG BUNDLE_GEMFILE
+ENV BUNDLE_GEMFILE $BUNDLE_GEMFILE
+
+RUN echo "gem: --no-document" >> ~/.gemrc
+
+COPY . /app
+RUN /bin/bash -lc "bundle install --jobs 5"

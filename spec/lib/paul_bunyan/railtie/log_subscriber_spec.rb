@@ -61,6 +61,11 @@ module PaulBunyan
     end
 
     describe '#process_action(event)' do
+      let(:request) {
+        req = instance_double("ActionDispatch::Request", ip: "127.0.0.1", env: {
+          "action_dispatch.request_id" => "dfa6f7b5-8400-4572-a2f7-80504ed9d09a"
+        })
+      }
       let(:event) {
         ActiveSupport::Notifications::Event.new(
           'process_action.action_controller',
@@ -74,8 +79,7 @@ module PaulBunyan
             :format => :html,
             :method => "GET",
             :path => "/foos/42",
-            :request_id => "dfa6f7b5-8400-4572-a2f7-80504ed9d09a",
-            :ip => '127.0.0.1',
+            :request => request,
             :status => 200,
             :view_runtime => 220.038,
             :db_runtime => 10.177,

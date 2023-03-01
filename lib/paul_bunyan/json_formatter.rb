@@ -5,8 +5,8 @@ module PaulBunyan
   class JSONFormatter
     DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%3N'
 
-    def add_metadata(metadata)
-      current_metadata.merge!(metadata)
+    def add_metadata(metadata, **kw_metadata)
+      current_metadata.merge!(metadata).merge!(kw_metadata)
     end
 
     def call(severity, time, progname, msg)
@@ -63,8 +63,8 @@ module PaulBunyan
       end
     end
 
-    def remove_metadata(metadata)
-      metadata.each { |k, _| current_metadata.delete(k) }
+    def remove_metadata(metadata = {}, **kw_metadata)
+      (metadata.keys + kw_metadata.keys).each { |k| current_metadata.delete(k) }
     end
 
     def tagged(*tags)
@@ -74,11 +74,11 @@ module PaulBunyan
       pop_tags(clean_tags.size)
     end
 
-    def with_metadata(consumer_metadata)
-      add_metadata(consumer_metadata)
+    def with_metadata(consumer_metadata = {}, **kw_metadata)
+      add_metadata(consumer_metadata, **kw_metadata)
       yield
     ensure
-      remove_metadata(consumer_metadata)
+      remove_metadata(consumer_metadata, **kw_metadata)
     end
 
     private

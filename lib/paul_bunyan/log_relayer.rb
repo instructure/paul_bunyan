@@ -34,6 +34,11 @@ module PaulBunyan
 
     def add_logger(logger)
       loggers.push(logger)
+
+      # Appease rails checking if logger already writes to stdout
+      if loggers.length == 1
+        @logdev = loggers[0].instance_variable_get(:@logdev)
+      end
       logger
     end
 
@@ -140,8 +145,8 @@ module PaulBunyan
       pop_tags(new_tags.size)
     end
 
-    def add_metadata(metadata)
-      messaging_loggers(:add_metadata, metadata)
+    def add_metadata(metadata = {}, **kw_metadata)
+      messaging_loggers(:add_metadata, metadata, **kw_metadata)
     end
 
     def clear_metadata!
@@ -158,15 +163,15 @@ module PaulBunyan
       end
     end
 
-    def remove_metadata(metadata)
-      messaging_loggers(:remove_metadata, metadata)
+    def remove_metadata(metadata = {}, **kw_metadata)
+      messaging_loggers(:remove_metadata, metadata, **kw_metadata)
     end
 
-    def with_metadata(metadata)
-      add_metadata(metadata)
+    def with_metadata(metadata = {}, **kw_metadata)
+      add_metadata(metadata, **kw_metadata)
       yield
     ensure
-      remove_metadata(metadata)
+      remove_metadata(metadata, **kw_metadata)
     end
 
     private
@@ -181,8 +186,19 @@ module PaulBunyan
       end
     end
 
-    def messaging_loggers(required_method, *args)
-      loggers.each { |l| l.public_send(required_method, *args) if l.respond_to?(required_method) }
+    def messaging_loggers(required_method, *args, **kwargs)
+      loggers.each do |l|
+        next unless l.respond_to?(required_method)
+
+        # TODO remove this if and just always use the second branch once we only support
+        # ruby 3.0+ (and remove 2.7).  Only matters for matchers in specs that natively
+        # work correctly on ruby 3.0
+        if kwargs.empty?
+          l.public_send(required_method, *args)
+        else
+          l.public_send(required_method, *args, **kwargs)
+        end         
+      end
       nil
     end
   end

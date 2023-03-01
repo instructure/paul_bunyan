@@ -16,15 +16,15 @@ describe PaulBunyan::MetadataLogging do
     end
 
     it 'must delegate with_metadata to the formatter' do
-      expect(formatter).to receive(:with_metadata).with(foo: 'bar').and_yield
-      subject.with_metadata(foo: 'bar') do |logger|
+      expect(formatter).to receive(:with_metadata).with({hash: 123}, foo: 'bar').and_yield
+      subject.with_metadata({hash: 123}, foo: 'bar') do |logger|
         expect(subject).to eq logger
       end
     end
 
     it 'must delegate add_metadata to the formatter' do
-      expect(formatter).to receive(:add_metadata).with(foo: 'bar')
-      subject.add_metadata(foo: 'bar')
+      expect(formatter).to receive(:add_metadata).with({hash: 123}, foo: 'bar')
+      subject.add_metadata({hash: 123}, foo: 'bar')
     end
 
     it 'must delegate current_metadata to the formatter' do
@@ -33,8 +33,8 @@ describe PaulBunyan::MetadataLogging do
     end
 
     it 'must delegate remove_metadata to the formatter' do
-      expect(formatter).to receive(:remove_metadata).with(foo: 'bar')
-      subject.remove_metadata(foo: 'bar')
+      expect(formatter).to receive(:remove_metadata).with({hash: 123}, foo: 'bar')
+      subject.remove_metadata({hash: 123}, foo: 'bar')
     end
 
     context '#flush' do

@@ -4,20 +4,20 @@ module PaulBunyan
       formatter.clear_metadata! if formatter.respond_to?(:clear_metadata!)
     end
 
-    def with_metadata(metadata)
+    def with_metadata(metadata = {}, **kw_metadata)
       if formatter.respond_to?(:with_metadata)
-        formatter.with_metadata(metadata) { yield self }
+        formatter.with_metadata(metadata, **kw_metadata) { yield self }
       else
         yield self
       end
     end
 
-    def add_metadata(metadata)
-      formatter.add_metadata(metadata) if formatter.respond_to?(:add_metadata)
+    def add_metadata(metadata = {}, **kw_metadata)
+      formatter.add_metadata(metadata, **kw_metadata) if formatter.respond_to?(:add_metadata)
     end
 
-    def remove_metadata(metadata)
-      formatter.remove_metadata(metadata) if formatter.respond_to?(:remove_metadata)
+    def remove_metadata(metadata = {}, **kw_metadata)
+      formatter.remove_metadata(metadata, **kw_metadata) if formatter.respond_to?(:remove_metadata)
     end
 
     def current_metadata
