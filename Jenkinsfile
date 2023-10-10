@@ -18,14 +18,14 @@ pipeline {
             values '2.7', '3.0', '3.1'
           }
           axis {
-            name 'RAILS_VERSION'
-            values '6.1', '7.0'
+            name 'LOCKFILE'
+            values 'rails-6.1', 'rails-7.0', 'Gemfile.lock'
           }
         }
         stages {
           stage('Build') {
             steps {
-              sh "docker-compose build --pull --build-arg RUBY_VERSION=${RUBY_VERSION} --build-arg BUNDLE_GEMFILE=gemfiles/rails_${RAILS_VERSION}.gemfile test"
+              sh "docker-compose build --pull --build-arg RUBY_VERSION=${RUBY_VERSION} --build-arg BUNDLE_LOCKFILE=${LOCKFILE} test"
               sh 'docker-compose run --rm test bundle exec rake'
             }
           }
